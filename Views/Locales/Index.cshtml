@@ -1,0 +1,54 @@
+@model IEnumerable<TeaMall.Models.Local>
+
+@{
+    ViewData["Title"] = "Locales";
+}
+
+<h1>Locales</h1>
+
+<p>
+    <a asp-action="Create">Nuevo Local</a>
+</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var local in Model)
+        {
+            <tr>
+                <td>@local.Nombre</td>
+
+                <td>
+                    @(local.Activo ? "Activo" : "Inactivo")
+                </td>
+
+                <td>
+                    <a asp-action="Edit" asp-route-id="@local.IdLocal">
+                        Editar
+                    </a>
+
+                    @if (local.Activo)
+                    {
+                        <form asp-action="Desactivar"
+                              asp-route-id="@local.IdLocal"
+                              method="post"
+                              style="display:inline">
+
+                            <button type="submit">
+                                Desactivar
+                            </button>
+
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

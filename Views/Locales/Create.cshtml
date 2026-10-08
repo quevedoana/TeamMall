@@ -1,0 +1,26 @@
+@model TeaMall.Models.Local
+
+@{
+    ViewData["Title"] = "Nuevo Local";
+}
+
+<h1>Nuevo Local</h1>
+
+<form asp-action="Create" method="post">
+
+    <div>
+        <label asp-for="Nombre"></label>
+        <input asp-for="Nombre" />
+        <span asp-validation-for="Nombre"></span>
+    </div>
+
+    <div>
+        <label asp-for="Activo"></label>
+        <input asp-for="Activo" type="checkbox" />
+    </div>
+
+    <button type="submit">Guardar</button>
+
+    <a asp-action="Index">Volver</a>
+
+</form>
