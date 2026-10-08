@@ -25,6 +25,12 @@ namespace TeaMall.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Usuario>().ToTable("usuario");
+            modelBuilder.Entity<Local>().ToTable("local");
+            modelBuilder.Entity<Publicacion>().ToTable("publicacion");
+            modelBuilder.Entity<PublicacionLocal>().ToTable("publicacionlocal");
+            modelBuilder.Entity<Inasistencia>().ToTable("inasistencia");
+            modelBuilder.Entity<Notificacion>().ToTable("notificacion");
 
             // Usuario -> Local
             modelBuilder.Entity<Usuario>()
