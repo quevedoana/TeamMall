@@ -1,0 +1,57 @@
+@model TeaMall.Models.Local
+
+@{
+    ViewData["Title"] = "Editar local";
+}
+
+<div class="tm-page-header mb-4">
+    <a asp-action="Index" class="tm-back-link">← Volver a locales</a>
+    <h1 class="mt-3 mb-1">Editar local</h1>
+    <p class="text-muted mb-0">Modificá la información del local seleccionado.</p>
+</div>
+
+<div class="tm-form-card">
+    <div class="tm-form-heading">
+        <div class="tm-form-icon">✎</div>
+        <div>
+            <h5 class="mb-1">Datos del local</h5>
+            <p class="text-muted small mb-0">Local ID: @Model.IdLocal</p>
+        </div>
+    </div>
+
+    <hr class="tm-form-divider" />
+
+    <form asp-action="Edit" asp-route-id="@Model.IdLocal" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="IdLocal" />
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="mb-4">
+            <label asp-for="Nombre" class="form-label tm-form-label">
+                Nombre del local <span class="text-danger">*</span>
+            </label>
+            <input asp-for="Nombre" class="form-control tm-input" />
+            <span asp-validation-for="Nombre" class="text-danger small"></span>
+        </div>
+
+        <div class="tm-status-option mb-4">
+            <div>
+                <div class="fw-semibold">Local activo</div>
+                <div class="text-muted small">Podés cambiar el estado del local desde acá.</div>
+            </div>
+            <div class="form-check form-switch">
+                <input asp-for="Activo" class="form-check-input tm-switch" role="switch" />
+            </div>
+        </div>
+
+        <div class="tm-form-actions">
+            <a asp-action="Index" class="btn tm-btn-cancel">Cancelar</a>
+            <button type="submit" class="btn tm-btn-primary">Guardar cambios</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

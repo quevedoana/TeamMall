@@ -57,7 +57,7 @@ namespace TeaMall.Migrations
 
                     b.HasIndex("IdUsuario");
 
-                    b.ToTable("Inasistencias");
+                    b.ToTable("inasistencia", (string)null);
                 });
 
             modelBuilder.Entity("TeaMall.Models.Local", b =>
@@ -77,7 +77,7 @@ namespace TeaMall.Migrations
 
                     b.HasKey("IdLocal");
 
-                    b.ToTable("Locales");
+                    b.ToTable("local", (string)null);
                 });
 
             modelBuilder.Entity("TeaMall.Models.Notificacion", b =>
@@ -109,7 +109,7 @@ namespace TeaMall.Migrations
 
                     b.HasIndex("IdUsuario");
 
-                    b.ToTable("Notificaciones");
+                    b.ToTable("notificacion", (string)null);
                 });
 
             modelBuilder.Entity("TeaMall.Models.Publicacion", b =>
@@ -145,7 +145,7 @@ namespace TeaMall.Migrations
 
                     b.HasIndex("IdUsuario");
 
-                    b.ToTable("Publicaciones");
+                    b.ToTable("publicacion", (string)null);
                 });
 
             modelBuilder.Entity("TeaMall.Models.PublicacionLocal", b =>
@@ -160,7 +160,7 @@ namespace TeaMall.Migrations
 
                     b.HasIndex("IdLocal");
 
-                    b.ToTable("PublicacionesLocales");
+                    b.ToTable("publicacionlocal", (string)null);
                 });
 
             modelBuilder.Entity("TeaMall.Models.Usuario", b =>
@@ -208,7 +208,7 @@ namespace TeaMall.Migrations
 
                     b.HasIndex("IdLocal");
 
-                    b.ToTable("Usuarios");
+                    b.ToTable("usuario", (string)null);
                 });
 
             modelBuilder.Entity("TeaMall.Models.Inasistencia", b =>

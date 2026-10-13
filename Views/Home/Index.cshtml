@@ -1,8 +1,64 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿
+@{
+    ViewData["Title"] = "Inicio";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="tm-page-header">
+    <div>
+        <h1 class="tm-page-title">¡Bienvenido a TeamMall!</h1>
+        <p class="tm-page-description">
+            Panel de gestión y comunicación interna.
+        </p>
+    </div>
+</div>
+
+<div class="tm-card mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <div class="tm-brand-symbol">T</div>
+        <div>
+            <h5 class="mb-1">Tu espacio de trabajo</h5>
+            <p class="text-secondary mb-0">
+                Desde acá podrás gestionar los locales,
+                los usuarios y las comunicaciones internas.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12 col-md-6 col-xl-4">
+        <a asp-controller="Locales"
+           asp-action="Index"
+           class="tm-shortcut">
+            <div class="tm-shortcut-icon">▤</div>
+            <div>
+                <h5>Locales</h5>
+                <p>Administrá los locales comerciales.</p>
+            </div>
+            <span class="tm-shortcut-arrow">→</span>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+        <a asp-controller="Usuarios"
+           asp-action="Index"
+           class="tm-shortcut">
+            <div class="tm-shortcut-icon">♙</div>
+            <div>
+                <h5>Usuarios</h5>
+                <p>Consultá y gestioná los usuarios.</p>
+            </div>
+            <span class="tm-shortcut-arrow">→</span>
+        </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+        <div class="tm-shortcut tm-shortcut-disabled">
+            <div class="tm-shortcut-icon">▧</div>
+            <div>
+                <h5>Publicaciones</h5>
+                <p>Próximamente disponible.</p>
+            </div>
+        </div>
+    </div>
 </div>

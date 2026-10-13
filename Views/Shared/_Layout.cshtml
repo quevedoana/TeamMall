@@ -1,50 +1,151 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - TeaMall</title>
+
+    <title>@ViewData["Title"] - TeamMall</title>
+
     <script type="importmap"></script>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TeaMall.styles.css" asp-append-version="true" />
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TeaMall</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+
+<body class="tm-body">
+
+    <div class="tm-app">
+
+        <!-- Menú lateral -->
+        <aside class="offcanvas-lg offcanvas-start tm-sidebar"
+               tabindex="-1"
+               id="sidebarMenu"
+               aria-labelledby="sidebarTitle">
+
+            <div class="offcanvas-header tm-sidebar-header">
+                <a asp-controller="Home"
+                   asp-action="Index"
+                   class="tm-brand"
+                   id="sidebarTitle">
+                    <span class="tm-brand-symbol">T</span>
+                    <span>TeamMall</span>
+                </a>
+
+                <button type="button"
+                        class="btn-close btn-close-white d-lg-none"
+                        data-bs-dismiss="offcanvas"
+                        aria-label="Cerrar menú">
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+            </div>
+
+            <div class="offcanvas-body tm-sidebar-body">
+                <div class="tm-menu-label">MENÚ PRINCIPAL</div>
+
+                <nav class="tm-nav">
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="tm-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
+                        <span class="tm-nav-icon">⌂</span>
+                        <span>Inicio</span>
+                    </a>
+
+                    <a asp-controller="Locales"
+                       asp-action="Index"
+                       class="tm-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Locales" ? "active" : "")">
+                        <span class="tm-nav-icon">▤</span>
+                        <span>Locales</span>
+                    </a>
+
+                    <a asp-controller="Usuarios"
+                       asp-action="Index"
+                       class="tm-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Usuarios" ? "active" : "")">
+                        <span class="tm-nav-icon">♙</span>
+                        <span>Usuarios</span>
+                    </a>
+
+                    <div class="tm-menu-label mt-4">COMUNICACIÓN</div>
+
+                    <a asp-controller="Publicaciones"
+                       asp-action="Index"
+                       class="tm-nav-link">
+                        <span class="tm-nav-icon">▧</span>
+                        <span>Publicaciones</span>
+                    </a>
+
+                    <a asp-controller="Inasistencias"
+                       asp-action="Index"
+                       class="tm-nav-link">
+                        <span class="tm-nav-icon">▣</span>
+                        <span>Inasistencias</span>
+                    </a>
+
+                    <a asp-controller="Notificaciones"
+                       asp-action="Index"
+                       class="tm-nav-link">
+                        <span class="tm-nav-icon">♧</span>
+                        <span>Notificaciones</span>
+                    </a>
+                </nav>
+
+                <div class="tm-sidebar-footer">
+                    <span class="tm-status-dot"></span>
+                    <span>TeamMall · Gestión interna</span>
                 </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        </aside>
+
+        <!-- Área principal -->
+        <div class="tm-main">
+
+            <!-- Barra superior -->
+            <header class="tm-topbar">
+                <div class="d-flex align-items-center gap-3">
+
+                    <button class="btn tm-menu-toggle d-lg-none"
+                            type="button"
+                            data-bs-toggle="offcanvas"
+                            data-bs-target="#sidebarMenu"
+                            aria-controls="sidebarMenu"
+                            aria-label="Abrir menú">
+                        ☰
+                    </button>
+
+                    <div>
+                        <div class="tm-topbar-brand">TeamMall</div>
+                        <div class="tm-topbar-subtitle">
+                            Gestión interna
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tm-user-area">
+                    <div class="tm-user-avatar">T</div>
+                    <div class="d-none d-sm-block">
+                        <div class="tm-user-name">Usuario</div>
+                        <div class="tm-user-role">Sistema interno</div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Contenido de cada vista -->
+            <main role="main" class="tm-content">
+                @RenderBody()
+            </main>
+
+            <footer class="tm-footer">
+                <span>TeamMall</span>
+                <span>Gestión y comunicación interna</span>
+            </footer>
+
+        </div>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - TeaMall - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
