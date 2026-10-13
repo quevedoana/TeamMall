@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TeaMall.Models
 {
@@ -16,7 +18,17 @@ namespace TeaMall.Models
         [Required(ErrorMessage = "El tipo de publicación es obligatorio.")]
         public string Tipo { get; set; } = string.Empty;
 
+        // Ruta del archivo guardada en la base de datos
         public string? Archivo { get; set; }
+
+        // Archivo que llega desde el formulario
+        [NotMapped]
+        [Display(Name = "Archivo")]
+        public IFormFile? ArchivoSubido { get; set; }
+
+        // Locales seleccionados para la publicación
+        [NotMapped]
+        public List<int> LocalesSeleccionados { get; set; } = new List<int>();
 
         [Required(ErrorMessage = "La fecha de publicación es obligatoria.")]
         public DateTime FechaPublicacion { get; set; }
