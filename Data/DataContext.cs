@@ -53,6 +53,13 @@ namespace TeaMall.Data
                     pl.IdPublicacion,
                     pl.IdLocal
                 });
+            modelBuilder.Entity<PublicacionLocal>()
+                .Property(pl => pl.IdPublicacion)
+                .ValueGeneratedNever();
+
+            modelBuilder.Entity<PublicacionLocal>()
+                .Property(pl => pl.IdLocal)
+                .ValueGeneratedNever();
 
             modelBuilder.Entity<PublicacionLocal>()
                 .HasOne<Publicacion>()

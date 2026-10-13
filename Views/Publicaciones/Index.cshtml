@@ -1,0 +1,98 @@
+@model IEnumerable<TeaMall.Models.Publicacion>
+
+@{
+    ViewData["Title"] = "Publicaciones";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="mb-1">Publicaciones</h1>
+        <p class="text-muted mb-0">
+            Gestión de publicaciones y comunicados
+        </p>
+    </div>
+
+    <a asp-action="Create" class="btn btn-primary">
+        + Nueva publicación
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        No hay publicaciones cargadas.
+    </div>
+}
+else
+{
+    <div class="row g-4">
+
+        @foreach (var publicacion in Model)
+        {
+            <div class="col-md-6 col-lg-4">
+
+                <div class="card h-100 shadow-sm border-0">
+
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+
+                            <h4 class="card-title mb-0">
+                                @publicacion.Titulo
+                            </h4>
+
+                            <span class="badge bg-primary">
+                                @publicacion.Tipo
+                            </span>
+
+                        </div>
+
+                        <p class="text-muted small mb-3">
+                            Publicado el
+                            @publicacion.FechaPublicacion.ToString("dd/MM/yyyy HH:mm")
+                        </p>
+
+                        <p class="card-text">
+                            @publicacion.Descripcion
+                        </p>
+
+                        @if (!string.IsNullOrEmpty(publicacion.Archivo))
+                        {
+                            <a href="@publicacion.Archivo"
+                               target="_blank"
+                               class="btn btn-outline-primary btn-sm">
+                                📎 Ver archivo
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted small">
+                                Sin archivo adjunto
+                            </span>
+                        }
+
+                    </div>
+
+                    <div class="card-footer bg-white border-0 d-flex justify-content-end gap-2">
+
+                        <a asp-action="Edit"
+                           asp-route-id="@publicacion.IdPublicacion"
+                           class="btn btn-warning btn-sm">
+                            Editar
+                        </a>
+
+                        <a asp-action="Delete"
+                           asp-route-id="@publicacion.IdPublicacion"
+                           class="btn btn-danger btn-sm">
+                            Eliminar
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+}
