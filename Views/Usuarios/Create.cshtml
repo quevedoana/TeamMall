@@ -1,0 +1,64 @@
+ @model TeaMall.Models.Usuario
+
+@{
+    ViewData["Title"] = "Nuevo usuario";
+}
+
+<h1>Nuevo usuario</h1>
+
+<form asp-action="Create" method="post">
+    <div>
+        <label asp-for="DNI"></label>
+        <input asp-for="DNI" />
+        <span asp-validation-for="DNI"></span>
+    </div>
+
+    <div>
+        <label asp-for="Nombre"></label>
+        <input asp-for="Nombre" />
+        <span asp-validation-for="Nombre"></span>
+    </div>
+
+    <div>
+        <label asp-for="Apellido"></label>
+        <input asp-for="Apellido" />
+        <span asp-validation-for="Apellido"></span>
+    </div>
+
+    <div>
+        <label asp-for="Email"></label>
+        <input asp-for="Email" />
+        <span asp-validation-for="Email"></span>
+    </div>
+
+    <div>
+        <label asp-for="Contrasenia">Contraseña inicial</label>
+        <input asp-for="Contrasenia" type="password" />
+        <span asp-validation-for="Contrasenia"></span>
+    </div>
+
+    <div>
+        <label asp-for="Rol"></label>
+        <select asp-for="Rol">
+            <option value="">Seleccionar rol</option>
+            <option value="Administrador">Administrador</option>
+            <option value="Vendedor">Vendedor</option>
+        </select>
+        <span asp-validation-for="Rol"></span>
+    </div>
+
+    <div>
+        <label asp-for="IdLocal">Local</label>
+        <select asp-for="IdLocal" asp-items="ViewBag.Locales">
+            <option value="">Sin local asignado</option>
+        </select>
+    </div>
+
+    <div>
+        <label asp-for="Activo">Activo</label>
+        <input asp-for="Activo" type="checkbox" checked />
+    </div>
+
+    <button type="submit">Guardar</button>
+    <a asp-action="Index">Volver</a>
+</form>
