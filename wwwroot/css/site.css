@@ -908,3 +908,57 @@ body.tm-body {
     line-height: 1;
 }
 
+/* ===== AVATAR DEL USUARIO ===== */
+
+.tm-user-avatar {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    overflow: hidden;
+    border: 2px solid #E5F4E6;
+    background-color: #E5F4E6;
+}
+
+/* Inicial cuando el usuario todavía no tiene foto */
+
+.tm-user-avatar-initial {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #063B2C;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+/* Efecto al pasar el mouse por el perfil */
+
+.tm-user-area {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    color: #263832;
+    text-decoration: none;
+    border-radius: 12px;
+    padding: 5px 8px;
+    transition: background-color 0.2s ease;
+}
+
+.tm-user-area:hover {
+    background-color: #F4F7F6;
+    color: #063B2C;
+}
+
+.tm-user-name {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.tm-user-role {
+    margin-top: 3px;
+    color: #7B8983;
+    font-size: 11px;
+}
+

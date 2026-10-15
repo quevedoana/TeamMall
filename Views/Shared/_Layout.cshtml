@@ -157,11 +157,28 @@
                    asp-action="Index"
                    class="tm-user-area text-decoration-none">
 
-                    <div class="tm-user-avatar">
-                        @(User.Identity?.IsAuthenticated == true
-                            ? User.Identity.Name?.Substring(0, 1).ToUpper()
-                            : "T")
-                    </div>
+                    @{
+                        var avatarUsuario = User.FindFirst("Avatar")?.Value;
+                        var nombreUsuario = User.Identity?.Name;
+                        var inicialUsuario = !string.IsNullOrWhiteSpace(nombreUsuario)
+                            ? nombreUsuario.Substring(0, 1).ToUpper()
+                            : "T";
+                    }
+
+                    @if (User.Identity?.IsAuthenticated == true &&
+                         !string.IsNullOrWhiteSpace(avatarUsuario))
+                    {
+                        <img src="@avatarUsuario"
+                             alt="Foto de perfil"
+                             class="tm-user-avatar"
+                             asp-append-version="true" />
+                    }
+                    else
+                    {
+                        <div class="tm-user-avatar tm-user-avatar-initial">
+                            @inicialUsuario
+                        </div>
+                    }
 
                     <div class="d-none d-sm-block">
                         <div class="tm-user-name">

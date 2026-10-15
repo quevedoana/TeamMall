@@ -63,10 +63,17 @@ namespace TeaMall.Controllers
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
-                new Claim(ClaimTypes.Name, usuario.Nombre + " " + usuario.Apellido),
+                new Claim(
+                    ClaimTypes.NameIdentifier,
+                    usuario.IdUsuario.ToString()
+                ),
+                new Claim(
+                    ClaimTypes.Name,
+                    usuario.Nombre + " " + usuario.Apellido
+                ),
                 new Claim(ClaimTypes.Role, usuario.Rol),
-                new Claim("DNI", usuario.DNI)
+                new Claim("DNI", usuario.DNI),
+                new Claim("Avatar", usuario.Avatar ?? "")
             };
 
             var identidad = new ClaimsIdentity(
