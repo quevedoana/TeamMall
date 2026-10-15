@@ -1,0 +1,102 @@
+@model IEnumerable<TeaMall.Models.Inasistencia>
+
+@{
+    ViewData["Title"] = "Inasistencias";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="mb-1">Inasistencias</h1>
+        <p class="text-muted mb-0">
+            Gestión de inasistencias y justificaciones
+        </p>
+    </div>
+
+    <a asp-action="Create" class="btn btn-primary">
+        + Nueva inasistencia
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        No hay inasistencias cargadas.
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Tipo</th>
+                    <th>Fecha de ausencia</th>
+                    <th>Fecha de carga</th>
+                    <th>Comentario</th>
+                    <th>Archivo</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var inasistencia in Model)
+                {
+                    <tr>
+                        <td>
+                            @inasistencia.IdUsuario
+                        </td>
+
+                        <td>
+                            @inasistencia.Tipo
+                        </td>
+
+                        <td>
+                            @inasistencia.FechaAusencia.ToString("dd/MM/yyyy")
+                        </td>
+
+                        <td>
+                            @inasistencia.FechaCarga.ToString("dd/MM/yyyy HH:mm")
+                        </td>
+
+                        <td>
+                            @inasistencia.Comentario
+                        </td>
+
+                        <td>
+                            @if (!string.IsNullOrEmpty(inasistencia.Archivo))
+                            {
+                                <a href="@inasistencia.Archivo"
+                                   target="_blank"
+                                   class="btn btn-outline-primary btn-sm">
+                                    Ver archivo
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted">
+                                    Sin archivo
+                                </span>
+                            }
+                        </td>
+
+                        <td>
+                            @if (inasistencia.Estado == "Pendiente")
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    Pendiente
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">
+                                    @inasistencia.Estado
+                                </span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
