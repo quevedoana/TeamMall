@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using TeaMall.Data;
 using TeaMall.Models;
 
@@ -17,7 +18,42 @@ namespace TeaMall.Controllers
         // GET: Publicaciones
         public async Task<IActionResult> Index()
         {
+            // Si es administrador, puede ver todas las publicaciones
+            if (User.IsInRole("Administrador"))
+            {
+                var publicacionesAdmin = await _context.Publicaciones
+                    .OrderByDescending(p => p.FechaPublicacion)
+                    .ToListAsync();
+
+                return View(publicacionesAdmin);
+            }
+
+            // Obtenemos el ID del usuario logueado
+            var idUsuarioClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(idUsuarioClaim, out int idUsuario))
+            {
+                return Unauthorized();
+            }
+
+            // Buscamos el local del vendedor
+            var usuario = await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.IdUsuario == idUsuario);
+
+            if (usuario == null || !usuario.IdLocal.HasValue)
+            {
+                return View(new List<Publicacion>());
+            }
+
+            int idLocal = usuario.IdLocal.Value;
+
+            // Mostramos solamente las publicaciones dirigidas a su local
             var publicaciones = await _context.Publicaciones
+                .Where(p => _context.PublicacionesLocales
+                    .Any(pl =>
+                        pl.IdPublicacion == p.IdPublicacion &&
+                        pl.IdLocal == idLocal
+                    ))
                 .OrderByDescending(p => p.FechaPublicacion)
                 .ToListAsync();
 
@@ -42,14 +78,24 @@ namespace TeaMall.Controllers
         {
             if (!ModelState.IsValid)
             {
+                ViewBag.Locales = await _context.Locales
+                    .Where(l => l.Activo)
+                    .OrderBy(l => l.Nombre)
+                    .ToListAsync();
+
                 return View(publicacion);
             }
 
+            var idUsuarioClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(idUsuarioClaim, out int idUsuario))
+            {
+                return Unauthorized();
+            }
+
             publicacion.FechaPublicacion = DateTime.Now;
+            publicacion.IdUsuario = idUsuario;
 
-            publicacion.IdUsuario = 1;
-
-            // Por ahora usamos una carpeta general para los archivos de publicaciones
             string carpeta = Path.Combine(
                 Directory.GetCurrentDirectory(),
                 "wwwroot",
@@ -78,10 +124,12 @@ namespace TeaMall.Controllers
                 publicacion.Archivo = "/Uploads/Publicaciones/" + nombreArchivo;
             }
 
+            // Guardamos la publicación
             _context.Publicaciones.Add(publicacion);
             await _context.SaveChangesAsync();
 
-            foreach (var idLocal in publicacion.LocalesSeleccionados)
+            // Guardamos la relación entre publicación y locales
+            foreach (var idLocal in publicacion.LocalesSeleccionados.Distinct())
             {
                 _context.PublicacionesLocales.Add(new PublicacionLocal
                 {
@@ -90,10 +138,39 @@ namespace TeaMall.Controllers
                 });
             }
 
-            if (publicacion.LocalesSeleccionados.Any())
+            await _context.SaveChangesAsync();
+
+            // Buscamos los vendedores de los locales asociados a la publicación
+            var usuarios = await _context.PublicacionesLocales
+                .Where(pl => pl.IdPublicacion == publicacion.IdPublicacion)
+                .Join(
+                    _context.Usuarios,
+                    pl => pl.IdLocal,
+                    u => u.IdLocal,
+                    (pl, u) => u
+                )
+                .Where(u =>
+                    u.Activo &&
+                    u.Rol == "Vendedor"
+                )
+                .Select(u => u.IdUsuario)
+                .Distinct()
+                .ToListAsync();
+
+            // Creamos una notificación para cada vendedor
+            foreach (var idVendedor in usuarios)
             {
-                await _context.SaveChangesAsync();
+                _context.Notificaciones.Add(new Notificacion
+                {
+                    IdUsuario = idVendedor,
+                    IdPublicacion = publicacion.IdPublicacion,
+                    FechaCreacion = DateTime.Now,
+                    FechaLectura = null,
+                    Leida = false
+                });
             }
+
+            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using TeaMall.Data;
 using TeaMall.Models;
 
@@ -46,9 +47,14 @@ namespace TeaMall.Controllers
                 return View(inasistencia);
             }
 
-            // Temporalmente usamos el usuario administrador con Id 1.
-            // Luego esto se reemplazará con el usuario del login.
-            inasistencia.IdUsuario = 1;
+            var idUsuarioClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (!int.TryParse(idUsuarioClaim, out int idUsuario))
+            {
+                return Unauthorized();
+            }
+
+            inasistencia.IdUsuario = idUsuario;
 
             inasistencia.FechaCarga = DateTime.Now;
             inasistencia.Estado = "Pendiente";

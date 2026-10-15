@@ -1,0 +1,62 @@
+@model IEnumerable<TeaMall.Models.Notificacion>
+
+@{
+    ViewData["Title"] = "Notificaciones";
+}
+
+<div class="container mt-4">
+
+    <h2>Notificaciones</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info mt-3">
+            No tenés notificaciones nuevas.
+        </div>
+    }
+    else
+    {
+        <div class="list-group mt-3">
+
+            @foreach (var notificacion in Model)
+            {
+                <div class="list-group-item">
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <div>
+                            <strong>Nueva publicación</strong>
+
+                            <div class="text-muted">
+                                Se publicó una nueva comunicación para tu local.
+                            </div>
+
+                            <small class="text-muted">
+                                @notificacion.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
+                            </small>
+                        </div>
+
+                        <div>
+                            @if (notificacion.Leida)
+                            {
+                                <span class="badge bg-secondary">
+                                    Leída
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-primary">
+                                    Nueva
+                                </span>
+                            }
+                        </div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+    }
+
+</div>
