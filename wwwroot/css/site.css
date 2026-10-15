@@ -872,4 +872,39 @@ body.tm-body {
     color: #176b32;
     border-color: #68b66c;
 }
+/* Cerrar sesión */
+.tm-logout-form {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.tm-logout-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease,
+                color 0.2s ease,
+                border-color 0.2s ease;
+}
+
+.tm-logout-btn:hover {
+    background-color: #ED6265;
+    border-color: #ED6265;
+    color: #ffffff;
+}
+
+.tm-logout-icon {
+    font-size: 19px;
+    line-height: 1;
+}
 

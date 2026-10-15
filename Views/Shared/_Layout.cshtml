@@ -1,5 +1,4 @@
-﻿
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
@@ -41,9 +40,11 @@
             </div>
 
             <div class="offcanvas-body tm-sidebar-body">
+
                 <div class="tm-menu-label">MENÚ PRINCIPAL</div>
 
                 <nav class="tm-nav">
+
                     <a asp-controller="Home"
                        asp-action="Index"
                        class="tm-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
@@ -58,41 +59,70 @@
                         <span>Locales</span>
                     </a>
 
-                    <a asp-controller="Usuarios"
-                       asp-action="Index"
-                       class="tm-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Usuarios" ? "active" : "")">
-                        <span class="tm-nav-icon">♙</span>
-                        <span>Usuarios</span>
-                    </a>
+                    @if (User.IsInRole("Administrador"))
+                    {
+                        <a asp-controller="Usuarios"
+                           asp-action="Index"
+                           class="tm-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Usuarios" ? "active" : "")">
+                            <span class="tm-nav-icon">♙</span>
+                            <span>Usuarios</span>
+                        </a>
+                    }
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a asp-controller="Perfil"
+                           asp-action="Index"
+                           class="tm-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Perfil" ? "active" : "")">
+                            <span class="tm-nav-icon">♡</span>
+                            <span>Mi perfil</span>
+                        </a>
+                    }
 
                     <div class="tm-menu-label mt-4">COMUNICACIÓN</div>
 
                     <a asp-controller="Publicaciones"
                        asp-action="Index"
-                       class="tm-nav-link">
+                       class="tm-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Publicaciones" ? "active" : "")">
                         <span class="tm-nav-icon">▧</span>
                         <span>Publicaciones</span>
                     </a>
 
                     <a asp-controller="Inasistencias"
                        asp-action="Index"
-                       class="tm-nav-link">
+                       class="tm-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Inasistencias" ? "active" : "")">
                         <span class="tm-nav-icon">▣</span>
                         <span>Inasistencias</span>
                     </a>
 
                     <a asp-controller="Notificaciones"
                        asp-action="Index"
-                       class="tm-nav-link">
+                       class="tm-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Notificaciones" ? "active" : "")">
                         <span class="tm-nav-icon">♧</span>
                         <span>Notificaciones</span>
                     </a>
+
                 </nav>
 
                 <div class="tm-sidebar-footer">
                     <span class="tm-status-dot"></span>
                     <span>TeamMall · Gestión interna</span>
                 </div>
+
+                <!-- Cerrar sesión -->
+                <form asp-controller="Login"
+                      asp-action="Logout"
+                      method="post"
+                      class="tm-logout-form">
+
+                    @Html.AntiForgeryToken()
+
+                    <button type="submit" class="tm-logout-btn">
+                        <span class="tm-logout-icon">↪</span>
+                        <span>Cerrar sesión</span>
+                    </button>
+                </form>
+
             </div>
         </aside>
 
@@ -101,6 +131,7 @@
 
             <!-- Barra superior -->
             <header class="tm-topbar">
+
                 <div class="d-flex align-items-center gap-3">
 
                     <button class="btn tm-menu-toggle d-lg-none"
@@ -118,15 +149,40 @@
                             Gestión interna
                         </div>
                     </div>
+
                 </div>
 
-                <div class="tm-user-area">
-                    <div class="tm-user-avatar">T</div>
-                    <div class="d-none d-sm-block">
-                        <div class="tm-user-name">Usuario</div>
-                        <div class="tm-user-role">Sistema interno</div>
+                <!-- Usuario autenticado -->
+                <a asp-controller="Perfil"
+                   asp-action="Index"
+                   class="tm-user-area text-decoration-none">
+
+                    <div class="tm-user-avatar">
+                        @(User.Identity?.IsAuthenticated == true
+                            ? User.Identity.Name?.Substring(0, 1).ToUpper()
+                            : "T")
                     </div>
-                </div>
+
+                    <div class="d-none d-sm-block">
+                        <div class="tm-user-name">
+                            @(User.Identity?.IsAuthenticated == true
+                                ? User.Identity.Name
+                                : "Invitado")
+                        </div>
+
+                        <div class="tm-user-role">
+                            @(User.Identity?.IsAuthenticated == true
+                                ? (User.IsInRole("Administrador")
+                                    ? "Administrador"
+                                    : User.IsInRole("Vendedor")
+                                        ? "Vendedor"
+                                        : "Usuario")
+                                : "Sin sesión iniciada")
+                        </div>
+                    </div>
+
+                </a>
+
             </header>
 
             <!-- Contenido de cada vista -->
@@ -147,5 +203,6 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

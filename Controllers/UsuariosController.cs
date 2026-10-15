@@ -4,9 +4,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Identity;
 using TeaMall.Data;
 using TeaMall.Models;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace TeaMall.Controllers
 {
+    [Authorize(Roles = "Administrador")]
     public class UsuariosController : Controller
     {
         private readonly DataContext _context;
