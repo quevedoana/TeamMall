@@ -1,37 +1,120 @@
- @model IEnumerable<TeaMall.Models.Usuario>
+@model IEnumerable<TeaMall.Models.Usuario>
 
 @{
     ViewData["Title"] = "Usuarios";
+    var locales = ViewBag.Locales as List<TeaMall.Models.Local>;
 }
 
-<h1>Usuarios</h1>
+<div class="tm-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="mb-1">Usuarios</h1>
+        <p class="text-muted mb-0">Administrá los usuarios y sus permisos en TeamMall.</p>
+    </div>
 
-<p>
-    <a asp-action="Create">Nuevo usuario</a>
-</p>
+    <a asp-action="Create" class="btn tm-btn-primary">
+        <span class="me-2">+</span> Nuevo usuario
+    </a>
+</div>
 
-<table>
-    <thead>
-        <tr>
-            <th>DNI</th>
-            <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Email</th>
-            <th>Rol</th>
-            <th>Estado</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var usuario in Model)
-        {
-            <tr>
-                <td>@usuario.DNI</td>
-                <td>@usuario.Nombre</td>
-                <td>@usuario.Apellido</td>
-                <td>@usuario.Email</td>
-                <td>@usuario.Rol</td>
-                <td>@(usuario.Activo ? "Activo" : "Inactivo")</td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="tm-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div>
+            <h5 class="mb-1">Listado de usuarios</h5>
+            <p class="text-muted small mb-0">Consultá los datos y el estado de cada usuario.</p>
+        </div>
+
+        <span class="badge rounded-pill text-bg-light border">
+            Total: @(Model?.Count() ?? 0)
+        </span>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="text-center py-5">
+            <div class="mb-3" style="font-size: 2.5rem;">👥</div>
+            <h5>Todavía no hay usuarios</h5>
+            <p class="text-muted">Creá el primer usuario para comenzar.</p>
+            <a asp-action="Create" class="btn tm-btn-primary">
+                Crear usuario
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table tm-table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Email</th>
+                        <th>Local</th>
+                        <th>Rol</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var usuario in Model)
+                    {
+                        var local = locales?.FirstOrDefault(
+                            l => l.IdLocal == usuario.IdLocal
+                        );
+
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="tm-user-initial">
+                                        @(
+                                            !string.IsNullOrWhiteSpace(usuario.Nombre)
+                                                ? usuario.Nombre.Substring(0, 1).ToUpper()
+                                                : "U"
+                                        )
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">
+                                            @usuario.Nombre @usuario.Apellido
+                                        </div>
+                                        <div class="text-muted small">
+                                            DNI: @usuario.DNI
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>@usuario.Email</td>
+
+                            <td>
+                                @(local?.Nombre ?? "Sin local asignado")
+                            </td>
+
+                            <td>
+                                @if (usuario.Rol == "Administrador")
+                                {
+                                    <span class="tm-role-admin">Administrador</span>
+                                }
+                                else
+                                {
+                                    <span class="tm-role-vendedor">@usuario.Rol</span>
+                                }
+                            </td>
+
+                            <td>
+                                @if (usuario.Activo)
+                                {
+                                    <span class="tm-badge-active">
+                                        <span class="tm-status-dot"></span> Activo
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="tm-badge-inactive">
+                                        <span class="tm-status-dot"></span> Inactivo
+                                    </span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

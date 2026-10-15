@@ -1,64 +1,103 @@
- @model TeaMall.Models.Usuario
+@model TeaMall.Models.Usuario
 
 @{
     ViewData["Title"] = "Nuevo usuario";
 }
 
-<h1>Nuevo usuario</h1>
-
-<form asp-action="Create" method="post">
+<div class="tm-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
-        <label asp-for="DNI"></label>
-        <input asp-for="DNI" />
-        <span asp-validation-for="DNI"></span>
+        <h1 class="mb-1">Nuevo usuario</h1>
+        <p class="text-muted mb-0">
+            Registrá un usuario y configurá sus permisos en TeamMall.
+        </p>
     </div>
+</div>
 
-    <div>
-        <label asp-for="Nombre"></label>
-        <input asp-for="Nombre" />
-        <span asp-validation-for="Nombre"></span>
-    </div>
+<div class="tm-card tm-form-card">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
 
-    <div>
-        <label asp-for="Apellido"></label>
-        <input asp-for="Apellido" />
-        <span asp-validation-for="Apellido"></span>
-    </div>
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-    <div>
-        <label asp-for="Email"></label>
-        <input asp-for="Email" />
-        <span asp-validation-for="Email"></span>
-    </div>
+        <h5 class="mb-3">Datos personales</h5>
 
-    <div>
-        <label asp-for="Contrasenia">Contraseña inicial</label>
-        <input asp-for="Contrasenia" type="password" />
-        <span asp-validation-for="Contrasenia"></span>
-    </div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Nombre" class="form-label">Nombre</label>
+                <input asp-for="Nombre" class="form-control" placeholder="Ingresá el nombre" />
+                <span asp-validation-for="Nombre" class="text-danger small"></span>
+            </div>
 
-    <div>
-        <label asp-for="Rol"></label>
-        <select asp-for="Rol">
-            <option value="">Seleccionar rol</option>
-            <option value="Administrador">Administrador</option>
-            <option value="Vendedor">Vendedor</option>
-        </select>
-        <span asp-validation-for="Rol"></span>
-    </div>
+            <div class="col-md-6">
+                <label asp-for="Apellido" class="form-label">Apellido</label>
+                <input asp-for="Apellido" class="form-control" placeholder="Ingresá el apellido" />
+                <span asp-validation-for="Apellido" class="text-danger small"></span>
+            </div>
 
-    <div>
-        <label asp-for="IdLocal">Local</label>
-        <select asp-for="IdLocal" asp-items="ViewBag.Locales">
-            <option value="">Sin local asignado</option>
-        </select>
-    </div>
+            <div class="col-md-6">
+                <label asp-for="DNI" class="form-label">DNI</label>
+                <input asp-for="DNI" class="form-control" placeholder="Ingresá el DNI" />
+                <span asp-validation-for="DNI" class="text-danger small"></span>
+            </div>
 
-    <div>
-        <label asp-for="Activo">Activo</label>
-        <input asp-for="Activo" type="checkbox" checked />
-    </div>
+            <div class="col-md-6">
+                <label asp-for="Email" class="form-label">Correo electrónico</label>
+                <input asp-for="Email" type="email" class="form-control" placeholder="nombre@ejemplo.com" />
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+        </div>
 
-    <button type="submit">Guardar</button>
-    <a asp-action="Index">Volver</a>
-</form>
+        <hr class="my-4" />
+
+        <h5 class="mb-3">Acceso y permisos</h5>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Contrasenia" class="form-label">Contraseña inicial</label>
+                <input asp-for="Contrasenia" type="password" class="form-control" placeholder="Ingresá una contraseña" autocomplete="new-password" />
+                <span asp-validation-for="Contrasenia" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Rol" class="form-label">Rol</label>
+                <select asp-for="Rol" class="form-select">
+                    <option value="">Seleccionar rol</option>
+                    <option value="Administrador">Administrador</option>
+                    <option value="Vendedor">Vendedor</option>
+                </select>
+                <span asp-validation-for="Rol" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="IdLocal" class="form-label">Local asignado</label>
+                <select asp-for="IdLocal" asp-items="ViewBag.Locales" class="form-select">
+                    <option value="">Sin local asignado</option>
+                </select>
+                <span asp-validation-for="IdLocal" class="text-danger small"></span>
+                <small class="text-muted">
+                    Podés asignar un local a cada vendedor.
+                </small>
+            </div>
+
+            <div class="col-md-6 d-flex align-items-center">
+                <div class="form-check form-switch mt-3">
+                    <input asp-for="Activo" class="form-check-input" type="checkbox" />
+                    <label asp-for="Activo" class="form-check-label">
+                        Usuario activo
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
+            <a asp-action="Index" class="btn tm-btn-cancel">
+                Cancelar
+            </a>
+            <button type="submit" class="btn tm-btn-primary">
+                Guardar usuario
+            </button>
+        </div>
+    </form>
+</div>

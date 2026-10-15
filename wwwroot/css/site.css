@@ -809,3 +809,40 @@ body.tm-body {
         width: 100%;
     }
 }
+
+/* ===== USUARIOS ===== */
+
+.tm-user-initial {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #E8F3E9;
+    color: #176344;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.tm-role-admin,
+.tm-role-vendedor {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 7px;
+    padding: 6px 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.tm-role-admin {
+    background: #FCEBEC;
+    color: #B84249;
+}
+
+.tm-role-vendedor {
+    background: #E8F3E9;
+    color: #23733C;
+}
+
