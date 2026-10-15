@@ -845,4 +845,31 @@ body.tm-body {
     background: #E8F3E9;
     color: #23733C;
 }
+/* Botones de acciones de usuarios */
+.tm-btn-cancel {
+    transition: background-color 0.2s ease,
+                color 0.2s ease,
+                border-color 0.2s ease;
+}
+
+/* Editar: verde */
+.tm-btn-cancel:hover {
+    background-color: #e5f3e7;
+    color: #246b35;
+    border-color: #68b66c;
+}
+
+/* Desactivar: rojo al pasar el mouse */
+.tm-btn-desactivar:hover {
+    background-color: #fde8e8;
+    color: #b4232c;
+    border-color: #ed6265;
+}
+
+/* Activar: verde al pasar el mouse */
+.tm-btn-activar:hover {
+    background-color: #dff3e3;
+    color: #176b32;
+    border-color: #68b66c;
+}
 

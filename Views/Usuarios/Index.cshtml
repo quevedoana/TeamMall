@@ -34,6 +34,7 @@
             <div class="mb-3" style="font-size: 2.5rem;">👥</div>
             <h5>Todavía no hay usuarios</h5>
             <p class="text-muted">Creá el primer usuario para comenzar.</p>
+
             <a asp-action="Create" class="btn tm-btn-primary">
                 Crear usuario
             </a>
@@ -50,8 +51,10 @@
                         <th>Local</th>
                         <th>Rol</th>
                         <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
+
                 <tbody>
                     @foreach (var usuario in Model)
                     {
@@ -69,6 +72,7 @@
                                                 : "U"
                                         )
                                     </div>
+
                                     <div>
                                         <div class="fw-semibold">
                                             @usuario.Nombre @usuario.Apellido
@@ -101,15 +105,40 @@
                                 @if (usuario.Activo)
                                 {
                                     <span class="tm-badge-active">
-                                        <span class="tm-status-dot"></span> Activo
+                                        <span class="tm-status-dot"></span>
+                                        Activo
                                     </span>
                                 }
                                 else
                                 {
                                     <span class="tm-badge-inactive">
-                                        <span class="tm-status-dot"></span> Inactivo
+                                        <span class="tm-status-dot"></span>
+                                        Inactivo
                                     </span>
                                 }
+                            </td>
+
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <a asp-action="Edit"
+                                       asp-route-id="@usuario.IdUsuario"
+                                       class="btn btn-sm tm-btn-cancel tm-btn-editar">
+                                        Editar
+                                    </a>
+
+                                    <form asp-action="Desactivar"
+                                          asp-route-id="@usuario.IdUsuario"
+                                          method="post"
+                                          onsubmit="return confirm('¿Estás seguro de que querés @(usuario.Activo ? "desactivar" : "activar") a este usuario?');">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit"
+                                                class="btn btn-sm tm-btn-cancel @(usuario.Activo ? "tm-btn-desactivar" : "tm-btn-activar")">
+                                            @(usuario.Activo ? "Desactivar" : "Activar")
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     }

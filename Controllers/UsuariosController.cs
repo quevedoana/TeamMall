@@ -41,9 +41,66 @@ namespace TeaMall.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Usuario usuario)
         {
+            // Limpiar espacios innecesarios
+            usuario.DNI = usuario.DNI?.Trim() ?? "";
+            usuario.Nombre = usuario.Nombre?.Trim() ?? "";
+            usuario.Apellido = usuario.Apellido?.Trim() ?? "";
+            usuario.Email = usuario.Email?.Trim() ?? "";
+
+            // Validar DNI duplicado
+            if (!string.IsNullOrWhiteSpace(usuario.DNI))
+            {
+                bool dniExiste = await _context.Usuarios
+                    .AnyAsync(u => u.DNI == usuario.DNI);
+
+                if (dniExiste)
+                {
+                    ModelState.AddModelError(
+                        nameof(usuario.DNI),
+                        "Ya existe un usuario registrado con ese DNI."
+                    );
+                }
+            }
+
+            // Validar email duplicado, ignorando mayúsculas
+            if (!string.IsNullOrWhiteSpace(usuario.Email))
+            {
+                string emailNormalizado = usuario.Email.ToLower();
+
+                bool emailExiste = await _context.Usuarios
+                    .AnyAsync(u => u.Email.ToLower() == emailNormalizado);
+
+                if (emailExiste)
+                {
+                    ModelState.AddModelError(
+                        nameof(usuario.Email),
+                        "Ya existe un usuario registrado con ese email."
+                    );
+                }
+            }
+
+            
+
+            // Validar local asignado
+            if (usuario.IdLocal.HasValue)
+            {
+                bool localValido = await _context.Locales
+                    .AnyAsync(l =>
+                        l.IdLocal == usuario.IdLocal.Value &&
+                        l.Activo);
+
+                if (!localValido)
+                {
+                    ModelState.AddModelError(
+                        nameof(usuario.IdLocal),
+                        "El local seleccionado no existe o está inactivo."
+                    );
+                }
+            }
+
+            // Guardar solamente si todas las validaciones pasaron
             if (ModelState.IsValid)
             {
-                // Proteger la contraseña antes de guardarla
                 usuario.Contrasenia = _passwordHasher.HashPassword(
                     usuario,
                     usuario.Contrasenia
@@ -55,21 +112,159 @@ namespace TeaMall.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Si hay errores, volver a cargar los locales
+            // Recargar los locales si hay errores
             await CargarLocales();
 
             return View(usuario);
         }
 
-        private async Task CargarLocales()
+        // GET: Usuarios/Edit/5
+public async Task<IActionResult> Edit(int? id)
+{
+    if (id == null)
+    {
+        return NotFound();
+    }
+
+    var usuario = await _context.Usuarios.FindAsync(id);
+
+    if (usuario == null)
+    {
+        return NotFound();
+    }
+
+    await CargarLocales();
+
+    return View(usuario);
+}
+
+// POST: Usuarios/Edit/5
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Edit(int id, Usuario usuario)
+{
+    if (id != usuario.IdUsuario)
+    {
+        return NotFound();
+    }
+
+    var usuarioExistente = await _context.Usuarios.FindAsync(id);
+
+    if (usuarioExistente == null)
+    {
+        return NotFound();
+    }
+
+    // La contraseña no se modifica desde este formulario
+    ModelState.Remove(nameof(usuario.Contrasenia));
+
+    // Limpiar espacios innecesarios
+    usuario.DNI = usuario.DNI?.Trim() ?? "";
+    usuario.Nombre = usuario.Nombre?.Trim() ?? "";
+    usuario.Apellido = usuario.Apellido?.Trim() ?? "";
+    usuario.Email = usuario.Email?.Trim() ?? "";
+
+    // Comprobar DNI duplicado en otro usuario
+    if (await _context.Usuarios.AnyAsync(u =>
+        u.IdUsuario != id && u.DNI == usuario.DNI))
+    {
+        ModelState.AddModelError(
+            nameof(usuario.DNI),
+            "Ese DNI ya pertenece a otro usuario."
+        );
+    }
+
+    // Comprobar email duplicado en otro usuario
+    if (await _context.Usuarios.AnyAsync(u =>
+        u.IdUsuario != id &&
+        u.Email.ToLower() == usuario.Email.ToLower()))
+    {
+        ModelState.AddModelError(
+            nameof(usuario.Email),
+            "Ese email ya pertenece a otro usuario."
+        );
+    }
+
+    // Comprobar que el rol sea válido
+    if (usuario.Rol != "Administrador" &&
+        usuario.Rol != "Vendedor")
+    {
+        ModelState.AddModelError(
+            nameof(usuario.Rol),
+            "Seleccioná un rol válido."
+        );
+    }
+
+    // Comprobar que el local exista y esté activo
+    if (usuario.IdLocal.HasValue)
+    {
+        bool localValido = await _context.Locales.AnyAsync(l =>
+            l.IdLocal == usuario.IdLocal.Value && l.Activo);
+
+        if (!localValido)
         {
-            ViewBag.Locales = new SelectList(
-                await _context.Locales
-                    .Where(l => l.Activo)
-                    .ToListAsync(),
-                "IdLocal",
-                "Nombre"
+            ModelState.AddModelError(
+                nameof(usuario.IdLocal),
+                "El local seleccionado no existe o está inactivo."
             );
         }
+    }
+
+    if (ModelState.IsValid)
+    {
+        // Actualizar los campos permitidos
+        usuarioExistente.DNI = usuario.DNI;
+        usuarioExistente.Nombre = usuario.Nombre;
+        usuarioExistente.Apellido = usuario.Apellido;
+        usuarioExistente.Email = usuario.Email;
+        usuarioExistente.Rol = usuario.Rol;
+        usuarioExistente.IdLocal = usuario.IdLocal;
+        usuarioExistente.Activo = usuario.Activo;
+
+        // Conservar la contraseña y el avatar existentes
+        await _context.SaveChangesAsync();
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    await CargarLocales();
+
+    return View(usuario);
+}
+
+// POST: Usuarios/Desactivar/5
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Desactivar(int id)
+{
+    var usuario = await _context.Usuarios.FindAsync(id);
+
+    if (usuario == null)
+    {
+        return NotFound();
+    }
+
+    usuario.Activo = !usuario.Activo;
+
+    await _context.SaveChangesAsync();
+
+    return RedirectToAction(nameof(Index));
+}
+
+
+        // Cargar locales activos en el selector
+        private async Task CargarLocales()
+{
+    var locales = await _context.Locales
+        .Where(l => l.Activo)
+        .OrderBy(l => l.Nombre)
+        .ToListAsync();
+
+    ViewBag.Locales = new SelectList(
+        locales,
+        "IdLocal",
+        "Nombre"
+    );
+}
     }
 }
