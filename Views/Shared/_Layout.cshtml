@@ -151,6 +151,66 @@
                     </div>
 
                 </div>
+                <!-- Notificaciones Vue -->
+                <div id="appNotificaciones" class="tm-notifications">
+
+                    <button type="button"
+                            class="tm-notifications-btn"
+                            v-on:click="toggleNotificaciones"
+                            aria-label="Notificaciones">
+
+                        <span class="tm-notifications-icon">🔔</span>
+
+                        <span v-if="cantidadNoLeidas > 0"
+                            class="tm-notifications-badge">
+                            {{ cantidadNoLeidas }}
+                        </span>
+
+                    </button>
+
+                    <div v-if="mostrarDropdown"
+                        class="tm-notifications-dropdown">
+
+                        <div class="tm-notifications-header">
+                            <strong>Notificaciones</strong>
+                        </div>
+
+                        <div v-if="notificaciones.length === 0"
+                            class="tm-notifications-empty">
+                            No tenés notificaciones.
+                        </div>
+
+                        <div v-for="notificacion in notificaciones"
+                            v-else
+                            :key="notificacion.idNotificacion"
+                            class="tm-notification-item"
+                            v-on:click="abrirNotificacion(notificacion)">
+
+                            <div class="tm-notification-content">
+
+                                <div class="tm-notification-title">
+                                    {{ notificacion.titulo }}
+                                </div>
+
+                                <div class="tm-notification-description">
+                                    {{ notificacion.descripcion }}
+                                </div>
+
+                                <div class="tm-notification-date">
+                                    {{ formatearFecha(notificacion.fechaCreacion) }}
+                                </div>
+
+                            </div>
+
+                            <span v-if="!notificacion.leida"
+                                class="tm-notification-dot">
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
 
                 <!-- Usuario autenticado -->
                 <a asp-controller="Perfil"
@@ -217,6 +277,9 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)

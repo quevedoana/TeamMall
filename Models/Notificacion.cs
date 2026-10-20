@@ -19,5 +19,7 @@ namespace TeaMall.Models
         public DateTime? FechaLectura { get; set; }
 
         public bool Leida { get; set; }
+
+        public DateTime? FechaAccesoPublicacion { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-@model IEnumerable<TeaMall.Models.Notificacion>
+@model IEnumerable<dynamic>
 
 @{
     ViewData["Title"] = "Notificaciones";
@@ -18,17 +18,20 @@
     {
         <div class="list-group mt-3">
 
-            @foreach (var notificacion in Model)
+            @foreach (var item in Model)
             {
+                var notificacion = item.Notificacion;
+                var publicacion = item.Publicacion;
+
                 <div class="list-group-item">
 
                     <div class="d-flex justify-content-between align-items-center">
 
                         <div>
-                            <strong>Nueva publicación</strong>
+                            <strong>@publicacion.Titulo</strong>
 
                             <div class="text-muted">
-                                Se publicó una nueva comunicación para tu local.
+                                @publicacion.Descripcion
                             </div>
 
                             <small class="text-muted">
@@ -36,7 +39,8 @@
                             </small>
                         </div>
 
-                        <div>
+                        <div class="text-end">
+
                             @if (notificacion.Leida)
                             {
                                 <span class="badge bg-secondary">
@@ -49,6 +53,15 @@
                                     Nueva
                                 </span>
                             }
+
+                            <div class="mt-2">
+                                <a asp-action="VerPublicacion"
+                                asp-route-id="@publicacion.IdPublicacion"
+                                class="btn btn-sm btn-primary">
+                                    Ver publicación
+                                </a>
+                            </div>
+
                         </div>
 
                     </div>

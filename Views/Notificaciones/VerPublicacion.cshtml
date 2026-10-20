@@ -1,0 +1,45 @@
+@model TeaMall.Models.Publicacion
+
+@{
+    ViewData["Title"] = "Publicación";
+}
+
+<div class="container mt-4">
+
+    <h2>@Model.Titulo</h2>
+
+    <div class="card mt-3">
+        <div class="card-body">
+
+            <p class="text-muted">
+                @Model.Tipo
+            </p>
+
+            <p>
+                @Model.Descripcion
+            </p>
+
+            <p class="text-muted">
+                Publicado el:
+                @Model.FechaPublicacion.ToString("dd/MM/yyyy HH:mm")
+            </p>
+
+            @if (!string.IsNullOrEmpty(Model.Archivo))
+            {
+                <a href="@Model.Archivo"
+                   target="_blank"
+                   class="btn btn-primary">
+                    Descargar archivo
+                </a>
+            }
+
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-secondary">
+            Volver a notificaciones
+        </a>
+    </div>
+
+</div>

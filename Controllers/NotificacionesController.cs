@@ -31,7 +31,150 @@ namespace TeaMall.Controllers
                 .OrderByDescending(n => n.FechaCreacion)
                 .ToListAsync();
 
-            return View(notificaciones);
+            // Registramos el primer visto:
+            // el vendedor entró a la sección de notificaciones.
+            var notificacionesNoLeidas = notificaciones
+                .Where(n => !n.Leida)
+                .ToList();
+
+            if (notificacionesNoLeidas.Any())
+            {
+                foreach (var notificacion in notificacionesNoLeidas)
+                {
+                    notificacion.Leida = true;
+                    notificacion.FechaLectura = DateTime.Now;
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
+            // Volvemos a cargar las publicaciones asociadas
+            // para mostrarlas en la vista.
+            var resultado = await _context.Notificaciones
+                .Where(n => n.IdUsuario == idUsuario)
+                .Join(
+                    _context.Publicaciones,
+                    n => n.IdPublicacion,
+                    p => p.IdPublicacion,
+                    (n, p) => new
+                    {
+                        Notificacion = n,
+                        Publicacion = p
+                    }
+                )
+                .OrderByDescending(x => x.Notificacion.FechaCreacion)
+                .ToListAsync();
+
+            return View(resultado);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Obtener()
+        {
+            var idUsuarioClaim = User.FindFirstValue(
+                ClaimTypes.NameIdentifier
+            );
+
+            if (!int.TryParse(idUsuarioClaim, out int idUsuario))
+            {
+                return Unauthorized();
+            }
+
+            var notificaciones = await _context.Notificaciones
+                .Where(n => n.IdUsuario == idUsuario)
+                .Join(
+                    _context.Publicaciones,
+                    n => n.IdPublicacion,
+                    p => p.IdPublicacion,
+                    (n, p) => new
+                    {
+                        idNotificacion = n.IdNotificacion,
+                        idPublicacion = p.IdPublicacion,
+                        titulo = p.Titulo,
+                        descripcion = p.Descripcion,
+                        fechaCreacion = n.FechaCreacion,
+                        leida = n.Leida
+                    }
+                )
+                .OrderByDescending(n => n.fechaCreacion)
+                .ToListAsync();
+
+            return Json(notificaciones);
+        }
+        [HttpPost]
+        public async Task<IActionResult> MarcarComoLeidas()
+        {
+            var idUsuarioClaim = User.FindFirstValue(
+                ClaimTypes.NameIdentifier
+            );
+
+            if (!int.TryParse(idUsuarioClaim, out int idUsuario))
+            {
+                return Unauthorized();
+            }
+
+            var notificaciones = await _context.Notificaciones
+                .Where(n =>
+                    n.IdUsuario == idUsuario &&
+                    !n.Leida
+                )
+                .ToListAsync();
+
+            foreach (var notificacion in notificaciones)
+            {
+                notificacion.Leida = true;
+                notificacion.FechaLectura = DateTime.Now;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        // GET: Notificaciones/VerPublicacion/5
+        // GET: Notificaciones/VerPublicacion/5
+        public async Task<IActionResult> VerPublicacion(int id)
+        {
+            var idUsuarioClaim = User.FindFirstValue(
+                ClaimTypes.NameIdentifier
+            );
+
+            if (!int.TryParse(idUsuarioClaim, out int idUsuario))
+            {
+                return Unauthorized();
+            }
+
+            // Verificamos que la notificación pertenezca al usuario
+            var notificacion = await _context.Notificaciones
+                .FirstOrDefaultAsync(n =>
+                    n.IdPublicacion == id &&
+                    n.IdUsuario == idUsuario
+                );
+
+            if (notificacion == null)
+            {
+                return NotFound();
+            }
+
+            // Registramos el segundo visto:
+            // el vendedor entró a la publicación.
+            if (!notificacion.FechaAccesoPublicacion.HasValue)
+            {
+                notificacion.FechaAccesoPublicacion = DateTime.Now;
+
+                await _context.SaveChangesAsync();
+            }
+
+            // Buscamos la publicación
+            var publicacion = await _context.Publicaciones
+                .FirstOrDefaultAsync(p => p.IdPublicacion == id);
+
+            if (publicacion == null)
+            {
+                return NotFound();
+            }
+
+            return View(publicacion);
         }
     }
 }
