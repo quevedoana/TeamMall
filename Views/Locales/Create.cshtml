@@ -4,56 +4,152 @@
     ViewData["Title"] = "Nuevo local";
 }
 
-<div class="tm-page-header mb-4">
-    <a asp-action="Index" class="tm-back-link">← Volver a locales</a>
-    <h1 class="mt-3 mb-1">Nuevo local</h1>
-    <p class="text-muted mb-0">Completá los datos para registrar un nuevo local.</p>
-</div>
-
-<div class="tm-form-card">
-    <div class="tm-form-heading">
-        <div class="tm-form-icon">🏬</div>
-        <div>
-            <h5 class="mb-1">Datos del local</h5>
-            <p class="text-muted small mb-0">Los campos marcados son obligatorios.</p>
-        </div>
+<div id="appCrearLocal">
+    <div class="tm-page-header mb-4">
+        <a asp-action="Index" class="tm-back-link">← Volver a locales</a>
+        <h1 class="mt-3 mb-1">Nuevo local</h1>
+        <p class="text-muted mb-0">Completá los datos para registrar un nuevo local.</p>
     </div>
 
-    <hr class="tm-form-divider" />
-
-    <form asp-action="Create" method="post">
-        @Html.AntiForgeryToken()
-
-        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-
-        <div class="mb-4">
-            <label asp-for="Nombre" class="form-label tm-form-label">
-                Nombre del local <span class="text-danger">*</span>
-            </label>
-            <input asp-for="Nombre"
-                   class="form-control tm-input"
-                   placeholder="Ej.: Yagmour"
-                   autocomplete="off" />
-            <span asp-validation-for="Nombre" class="text-danger small"></span>
-        </div>
-
-        <div class="tm-status-option mb-4">
+    <div class="tm-form-card">
+        <div class="tm-form-heading">
+            <div class="tm-form-icon">🏬</div>
             <div>
-                <div class="fw-semibold">Local activo</div>
-                <div class="text-muted small">Si está activo, podrá asociarse a vendedores y publicaciones.</div>
-            </div>
-            <div class="form-check form-switch">
-                <input asp-for="Activo" class="form-check-input tm-switch" role="switch" />
+                <h5 class="mb-1">Datos del local</h5>
+                <p class="text-muted small mb-0">Los campos marcados son obligatorios.</p>
             </div>
         </div>
 
-        <div class="tm-form-actions">
-            <a asp-action="Index" class="btn tm-btn-cancel">Cancelar</a>
-            <button type="submit" class="btn tm-btn-primary">Guardar local</button>
-        </div>
-    </form>
+        <hr class="tm-form-divider" />
+
+        <form v-on:submit.prevent="crearLocal">
+            @Html.AntiForgeryToken()
+
+            <div v-if="error" class="alert alert-danger">
+                {{ error }}
+            </div>
+
+            <div v-if="exito" class="alert alert-success">
+                {{ exito }}
+            </div>
+
+            <div class="mb-4">
+                <label for="Nombre" class="form-label tm-form-label">
+                    Nombre del local <span class="text-danger">*</span>
+                </label>
+
+                <input id="Nombre"
+                       v-model.trim="nombre"
+                       type="text"
+                       class="form-control tm-input"
+                       placeholder="Ej.: Yagmour"
+                       autocomplete="off"
+                       required
+                       maxlength="100" />
+            </div>
+
+            <div class="tm-status-option mb-4">
+                <div>
+                    <div class="fw-semibold">Local activo</div>
+                    <div class="text-muted small">
+                        Si está activo, podrá asociarse a vendedores y publicaciones.
+                    </div>
+                </div>
+
+                <div class="form-check form-switch">
+                    <input v-model="activo"
+                           type="checkbox"
+                           class="form-check-input tm-switch"
+                           role="switch" />
+                </div>
+            </div>
+
+            <div class="tm-form-actions">
+                <a asp-action="Index" class="btn tm-btn-cancel">Cancelar</a>
+
+                <button type="submit"
+                        class="btn tm-btn-primary"
+                        v-bind:disabled="guardando">
+                    {{ guardando ? 'Guardando...' : 'Guardar local' }}
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    nombre: '',
+                    activo: true,
+                    guardando: false,
+                    error: '',
+                    exito: ''
+                };
+            },
+
+            methods: {
+                async crearLocal() {
+                    this.error = '';
+                    this.exito = '';
+
+                    if (!this.nombre) {
+                        this.error = 'Ingresá el nombre del local.';
+                        return;
+                    }
+
+                    const token = document.querySelector(
+                        '#appCrearLocal input[name="__RequestVerificationToken"]'
+                    )?.value;
+
+                    if (!token) {
+                        this.error = 'No se encontró el token de seguridad. Recargá la página.';
+                        return;
+                    }
+
+                    this.guardando = true;
+
+                    try {
+                        const respuesta = await fetch(
+                            '@Url.Action("Create", "Locales")',
+                            {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'RequestVerificationToken': token
+                                },
+                                body: JSON.stringify({
+                                    nombre: this.nombre,
+                                    activo: this.activo
+                                })
+                            }
+                        );
+
+                        const resultado = await respuesta.json();
+
+                        if (!respuesta.ok) {
+                            throw new Error(
+                                resultado.mensaje || 'No se pudo crear el local.'
+                            );
+                        }
+
+                        this.exito = resultado.mensaje;
+                        this.nombre = '';
+                        this.activo = true;
+
+                    } catch (error) {
+                        console.error('Error al crear el local:', error);
+                        this.error = error.message ||
+                            'Ocurrió un error al crear el local.';
+                    } finally {
+                        this.guardando = false;
+                    }
+                }
+            }
+        }).mount('#appCrearLocal');
+    </script>
 }

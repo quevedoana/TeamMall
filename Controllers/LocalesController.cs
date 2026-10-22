@@ -1,10 +1,13 @@
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using TeaMall.Data;
 using TeaMall.Models;
 
 namespace TeaMall.Controllers
 {
+    [Authorize(Roles = "Administrador")]
     public class LocalesController : Controller
     {
         private readonly DataContext _context;
@@ -15,14 +18,33 @@ namespace TeaMall.Controllers
         }
 
         // GET: Locales
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var locales = await _context.Locales.ToListAsync();
-
             return View(locales);
         }
 
+        // GET: Locales/Listar
+        [HttpGet]
+        public async Task<IActionResult> Listar()
+        {
+            var locales = await _context.Locales
+                .AsNoTracking()
+                .OrderBy(l => l.Nombre)
+                .Select(l => new
+                {
+                    idLocal = l.IdLocal,
+                    nombre = l.Nombre,
+                    activo = l.Activo
+                })
+                .ToListAsync();
+
+            return Json(locales);
+        }
+
         // GET: Locales/Create
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
@@ -31,20 +53,30 @@ namespace TeaMall.Controllers
         // POST: Locales/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Local local)
+        public async Task<IActionResult> Create([FromBody] Local local)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(local);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
+                return BadRequest(new
+                {
+                    mensaje = "Revisá los datos ingresados."
+                });
             }
 
-            return View(local);
+            _context.Locales.Add(local);
+            await _context.SaveChangesAsync();
+
+            return Json(new
+            {
+                mensaje = "Local creado correctamente.",
+                idLocal = local.IdLocal,
+                nombre = local.Nombre,
+                activo = local.Activo
+            });
         }
 
         // GET: Locales/Edit/5
+        [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -63,25 +95,51 @@ namespace TeaMall.Controllers
         }
 
         // POST: Locales/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Local local)
+        
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Edit(int id, [FromBody] Local local)
+{
+    if (id != local.IdLocal)
+    {
+        return BadRequest(new
         {
-            if (id != local.IdLocal)
-            {
-                return NotFound();
-            }
+            mensaje = "El identificador del local no coincide."
+        });
+    }
 
-            if (ModelState.IsValid)
-            {
-                _context.Update(local);
-                await _context.SaveChangesAsync();
+    if (!ModelState.IsValid)
+    {
+        return BadRequest(new
+        {
+            mensaje = "Revisá los datos ingresados."
+        });
+    }
 
-                return RedirectToAction(nameof(Index));
-            }
+    var localExistente = await _context.Locales.FindAsync(id);
 
-            return View(local);
-        }
+    if (localExistente == null)
+    {
+        return NotFound(new
+        {
+            mensaje = "No se encontró el local."
+        });
+    }
+
+    localExistente.Nombre = local.Nombre;
+    localExistente.Activo = local.Activo;
+
+    await _context.SaveChangesAsync();
+
+    return Json(new
+    {
+        mensaje = "Local actualizado correctamente.",
+        idLocal = localExistente.IdLocal,
+        nombre = localExistente.Nombre,
+        activo = localExistente.Activo
+    });
+}
+
 
         // POST: Locales/Desactivar/5
         [HttpPost]
@@ -92,15 +150,20 @@ namespace TeaMall.Controllers
 
             if (local == null)
             {
-                return NotFound();
+                return NotFound(new
+                {
+                    mensaje = "No se encontró el local."
+                });
             }
 
             local.Activo = false;
-
-            _context.Update(local);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
+            return Json(new
+            {
+                mensaje = "Local desactivado correctamente.",
+                idLocal = local.IdLocal
+            });
         }
     }
 }
