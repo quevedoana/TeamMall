@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TeaMall.Data;
 using TeaMall.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TeaMall.Controllers
 {
+    [Authorize(Roles = "Administrador")]
     public class LocalesController : Controller
     {
         private readonly DataContext _context;
@@ -22,27 +24,48 @@ namespace TeaMall.Controllers
             return View(locales);
         }
 
+        // GET: Locales/Listar
+[HttpGet]
+public async Task<IActionResult> Listar()
+{
+    var locales = await _context.Locales
+        .AsNoTracking()
+        .OrderBy(l => l.Nombre)
+        .Select(l => new
+        {
+            idLocal = l.IdLocal,
+            nombre = l.Nombre,
+            activo = l.Activo
+        })
+        .ToListAsync();
+
+    return Json(locales);
+}
+
         // GET: Locales/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Locales/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Local local)
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Create([FromBody] Local local)
+{
+    if (!ModelState.IsValid)
+    {
+        return BadRequest(new
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(local);
-                await _context.SaveChangesAsync();
+            mensaje = "Revisá los datos ingresados."
+        });
+    }
 
-                return RedirectToAction(nameof(Index));
-            }
+    _context.Locales.Add(local);
+    await _context.SaveChangesAsync();
 
-            return View(local);
-        }
+    return Json(new
+    {
+        mensaje = "Local creado correctamente.",
+        idLocal = local.IdLocal,
+        nombre = local.Nombre,
+        activo = local.Activo
+    });
+}
 
         // GET: Locales/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -84,23 +107,26 @@ namespace TeaMall.Controllers
         }
 
         // POST: Locales/Desactivar/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Desactivar(int id)
-        {
-            var local = await _context.Locales.FindAsync(id);
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Desactivar(int id)
+{
+    var local = await _context.Locales.FindAsync(id);
 
-            if (local == null)
-            {
-                return NotFound();
-            }
+    if (local == null)
+    {
+        return NotFound(new { mensaje = "No se encontró el local." });
+    }
 
-            local.Activo = false;
+    local.Activo = false;
+    await _context.SaveChangesAsync();
 
-            _context.Update(local);
-            await _context.SaveChangesAsync();
+    return Json(new
+    {
+        mensaje = "Local desactivado correctamente.",
+        idLocal = local.IdLocal
+    });
+}
 
-            return RedirectToAction(nameof(Index));
-        }
     }
 }

@@ -1,46 +1,61 @@
-@model IEnumerable<TeaMall.Models.Local>
 
 @{
     ViewData["Title"] = "Locales";
 }
 
-<div class="tm-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-    <div>
-        <h1 class="mb-1">Locales</h1>
-        <p class="text-muted mb-0">Administrá los locales asociados a TeamMall.</p>
-    </div>
-
-    <a asp-action="Create" class="btn tm-btn-primary">
-        <span class="me-2">+</span> Nuevo local
-    </a>
-</div>
-
-<div class="tm-card">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+<div id="appLocales">
+    <form id="formToken" class="d-none">
+        @Html.AntiForgeryToken()
+    </form>
+    <div class="tm-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
-            <h5 class="mb-1">Listado de locales</h5>
-            <p class="text-muted small mb-0">Consultá y administrá los locales registrados.</p>
+            <h1 class="mb-1">Locales</h1>
+            <p class="text-muted mb-0">Administrá los locales asociados a TeamMall.</p>
         </div>
 
-        <span class="badge rounded-pill text-bg-light border">
-            Total: @(Model?.Count() ?? 0)
-        </span>
+        <a href="@Url.Action("Create", "Locales")" class="btn tm-btn-primary">
+            <span class="me-2">+</span> Nuevo local
+        </a>
     </div>
 
-    @if (Model == null || !Model.Any())
-    {
-        <div class="text-center py-5">
+    <div class="tm-card">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <div>
+                <h5 class="mb-1">Listado de locales</h5>
+                <p class="text-muted small mb-0">
+                    Consultá y administrá los locales registrados.
+                </p>
+            </div>
+
+            <span class="badge rounded-pill text-bg-light border">
+                Total: {{ locales.length }}
+            </span>
+        </div>
+
+        <div v-if="cargando" class="text-center py-5">
+            Cargando locales...
+        </div>
+
+        <div v-else-if="error" class="alert alert-danger">
+            {{ error }}
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger ms-2"
+                    v-on:click="cargarLocales">
+                Reintentar
+            </button>
+        </div>
+
+        <div v-else-if="locales.length === 0" class="text-center py-5">
             <div class="mb-3" style="font-size: 2.5rem;">🏬</div>
             <h5>Todavía no hay locales</h5>
             <p class="text-muted">Creá el primer local para comenzar.</p>
-            <a asp-action="Create" class="btn tm-btn-primary">
+            <a href="@Url.Action("Create", "Locales")"
+               class="btn tm-btn-primary">
                 Crear local
             </a>
         </div>
-    }
-    else
-    {
-        <div class="table-responsive">
+
+        <div v-else class="table-responsive">
             <table class="table tm-table align-middle mb-0">
                 <thead>
                     <tr>
@@ -49,62 +64,148 @@
                         <th class="text-end">Acciones</th>
                     </tr>
                 </thead>
+
                 <tbody>
-                    @foreach (var local in Model)
-                    {
-                        <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="tm-local-icon">🏬</div>
-                                    <div>
-                                        <div class="fw-semibold">@local.Nombre</div>
-                                        <div class="text-muted small">ID: @local.IdLocal</div>
+                    <tr v-for="local in locales" v-bind:key="local.idLocal">
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="tm-local-icon">🏬</div>
+                                <div>
+                                    <div class="fw-semibold">{{ local.nombre }}</div>
+                                    <div class="text-muted small">
+                                        ID: {{ local.idLocal }}
                                     </div>
                                 </div>
-                            </td>
+                            </div>
+                        </td>
 
-                            <td>
-                                @if (local.Activo)
-                                {
-                                    <span class="tm-badge-active">
-                                        <span class="tm-status-dot"></span> Activo
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="tm-badge-inactive">
-                                        <span class="tm-status-dot"></span> Inactivo
-                                    </span>
-                                }
-                            </td>
+                        <td>
+                            <span v-if="local.activo" class="tm-badge-active">
+                                <span class="tm-status-dot"></span> Activo
+                            </span>
+                            <span v-else class="tm-badge-inactive">
+                                <span class="tm-status-dot"></span> Inactivo
+                            </span>
+                        </td>
 
-                            <td class="text-end">
-                                <div class="d-inline-flex align-items-center gap-2">
-                                    <a asp-action="Edit"
-                                       asp-route-id="@local.IdLocal"
-                                       class="btn btn-sm tm-btn-edit">
-                                        Editar
-                                    </a>
+                        <td class="text-end">
+                            <div class="d-inline-flex align-items-center gap-2">
+                                <a v-bind:href="'@Url.Action("Edit", "Locales")/' + local.idLocal"
+                                   class="btn btn-sm tm-btn-edit">
+                                    Editar
+                                </a>
 
-                                    @if (local.Activo)
-                                    {
-                                        <form asp-action="Desactivar"
-                                              asp-route-id="@local.IdLocal"
-                                              method="post"
-                                              class="d-inline"
-                                              onsubmit="return confirm('¿Seguro que querés desactivar este local?');">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="btn btn-sm tm-btn-disable">
-                                                Desactivar
-                                            </button>
-                                        </form>
-                                    }
-                                </div>
-                            </td>
-                        </tr>
-                    }
+                                <button v-if="local.activo"
+                                        type="button"
+                                        class="btn btn-sm tm-btn-disable"
+                                        v-on:click="desactivar(local.idLocal)">
+                                    Desactivar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </div>
-    }
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    locales: [],
+                    cargando: true,
+                    error: ''
+                };
+            },
+
+            methods: {
+                async cargarLocales() {
+                    this.cargando = true;
+                    this.error = '';
+
+                    try {
+                        const respuesta = await fetch('@Url.Action("Listar", "Locales")');
+
+                        if (!respuesta.ok) {
+                            throw new Error(
+                                'No se pudieron obtener los locales. Código: ' +
+                                respuesta.status
+                            );
+                        }
+
+                        this.locales = await respuesta.json();
+                    } catch (error) {
+                        console.error('Error al cargar locales:', error);
+                        this.error = error.message ||
+                            'Ocurrió un error al cargar los locales.';
+                    } finally {
+                        this.cargando = false;
+                    }
+                },
+
+                
+    async desactivar(idLocal) {
+        if (!confirm('¿Seguro que querés desactivar este local?')) {
+        return;
+    }
+
+    const tokenInput = document.querySelector(
+        '#formToken input[name="__RequestVerificationToken"]'
+    );
+
+    if (!tokenInput) {
+        alert('No se encontró el token de seguridad. Recargá la página.');
+        return;
+    }
+
+    try {
+        const respuesta = await fetch(
+    '@Url.Action("Desactivar", "Locales", new { id = "__ID__" })'
+        .replace('__ID__', idLocal),
+    {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams({
+            '__RequestVerificationToken': tokenInput.value
+        })
+    }
+);
+
+        if (!respuesta.ok) {
+            throw new Error(
+                'No se pudo desactivar el local. Código: ' + respuesta.status
+            );
+        }
+
+        const resultado = await respuesta.json();
+
+        const local = this.locales.find(
+            l => l.idLocal === resultado.idLocal
+        );
+
+        if (local) {
+            local.activo = false;
+        }
+
+        alert(resultado.mensaje);
+    } catch (error) {
+        console.error('Error al desactivar:', error);
+        alert(error.message || 'Ocurrió un error al desactivar el local.');
+    }
+}
+
+            },
+
+            mounted() {
+                this.cargarLocales();
+            }
+        }).mount('#appLocales');
+    </script>
+}
