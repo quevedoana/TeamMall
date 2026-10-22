@@ -11,11 +11,14 @@
             Gestión de publicaciones y comunicados
         </p>
     </div>
-
+@if (User.IsInRole("Administrador"))
+{
     <a asp-action="Create" class="btn btn-primary">
         + Nueva publicación
     </a>
+}
 </div>
+
 
 @if (!Model.Any())
 {
@@ -72,7 +75,8 @@ else
                         }
 
                     </div>
-
+                @if (User.IsInRole("Administrador"))
+                {
                     <div class="card-footer bg-white border-0 d-flex justify-content-end gap-2">
 
                         <a asp-action="Edit"
@@ -87,7 +91,14 @@ else
                             Eliminar
                         </a>
 
+                        <a asp-action="Accesos"
+                            asp-route-id="@publicacion.IdPublicacion"
+                            class="btn btn-info btn-sm">
+                                Ver accesos
+                        </a>
+
                     </div>
+                }
 
                 </div>
 

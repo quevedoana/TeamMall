@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -61,6 +62,7 @@ namespace TeaMall.Controllers
         }
 
         // GET: Publicaciones/Create
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Create()
         {
             ViewBag.Locales = await _context.Locales
@@ -74,6 +76,7 @@ namespace TeaMall.Controllers
         // POST: Publicaciones/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Create(Publicacion publicacion)
         {
             if (!ModelState.IsValid)
@@ -176,6 +179,7 @@ namespace TeaMall.Controllers
         }
 
         // GET: Publicaciones/Edit/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -196,6 +200,7 @@ namespace TeaMall.Controllers
         // POST: Publicaciones/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Edit(int id, Publicacion publicacion)
         {
             if (id != publicacion.IdPublicacion)
@@ -227,6 +232,7 @@ namespace TeaMall.Controllers
         }
 
         // GET: Publicaciones/Delete/5
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -248,6 +254,7 @@ namespace TeaMall.Controllers
         // POST: Publicaciones/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrador")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var publicacion = await _context.Publicaciones.FindAsync(id);
@@ -264,6 +271,43 @@ namespace TeaMall.Controllers
         private bool PublicacionExists(int id)
         {
             return _context.Publicaciones.Any(e => e.IdPublicacion == id);
+        }
+
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> Accesos(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var publicacion = await _context.Publicaciones
+                .FirstOrDefaultAsync(p => p.IdPublicacion == id);
+
+            if (publicacion == null)
+            {
+                return NotFound();
+            }
+
+            var accesos = await _context.Notificaciones
+                .Where(n => n.IdPublicacion == id)
+                .Join(
+                    _context.Usuarios,
+                    n => n.IdUsuario,
+                    u => u.IdUsuario,
+                    (n, u) => new
+                    {
+                        Usuario = u.Nombre + " " + u.Apellido,
+                        Leida = n.Leida,
+                        FechaLectura = n.FechaLectura,
+                        FechaAccesoPublicacion = n.FechaAccesoPublicacion
+                    }
+                )
+                .ToListAsync();
+
+            ViewBag.Publicacion = publicacion;
+
+            return View(accesos);
         }
     }
 }

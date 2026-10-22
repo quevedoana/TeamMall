@@ -1,0 +1,124 @@
+@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Accesos a la publicación";
+    var publicacion = ViewBag.Publicacion as TeaMall.Models.Publicacion;
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>Accesos a la publicación</h2>
+
+            @if (publicacion != null)
+            {
+                <p class="text-muted mb-0">
+                    @publicacion.Titulo
+                </p>
+            }
+        </div>
+
+        <a asp-action="Index" class="btn btn-secondary">
+            Volver
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-4">
+                    <p class="text-muted mb-0">
+                        Ningún vendedor recibió esta publicación.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead>
+                            <tr>
+                                <th>Vendedor</th>
+                                <th>Vio la notificación</th>
+                                <th>Accedió a la publicación</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var acceso in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <strong>
+                                            @acceso.Usuario
+                                        </strong>
+                                    </td>
+
+                                    <td>
+                                        @if (acceso.Leida)
+                                        {
+                                            <span class="text-success">
+                                                Sí
+                                            </span>
+
+                                            @if (acceso.FechaLectura != null)
+                                            {
+                                                <br />
+
+                                                <small class="text-muted">
+                                                    @acceso.FechaLectura.ToString("dd/MM/yyyy HH:mm")
+                                                </small>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">
+                                                No
+                                            </span>
+                                        }
+                                    </td>
+
+                                    <td>
+                                        @if (acceso.FechaAccesoPublicacion != null)
+                                        {
+                                            <span class="text-success">
+                                                Sí
+                                            </span>
+
+                                            <br />
+
+                                            <small class="text-muted">
+                                                @acceso.FechaAccesoPublicacion.ToString("dd/MM/yyyy HH:mm")
+                                            </small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-danger">
+                                                No
+                                            </span>
+                                        }
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

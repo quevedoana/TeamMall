@@ -20,9 +20,58 @@ namespace TeaMall.Controllers
         }
 
         // GET: Inasistencias
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+            DateTime? fechaDesde,
+            DateTime? fechaHasta,
+            string? tipo)
         {
+            // Si es administrador, puede ver todas las inasistencias
+            if (User.IsInRole("Administrador"))
+            {
+                var consulta = _context.Inasistencias
+                    .AsQueryable();
+
+                // Filtro por fecha desde
+                if (fechaDesde.HasValue)
+                {
+                    consulta = consulta.Where(i =>
+                        i.FechaAusencia >= fechaDesde.Value);
+                }
+
+                // Filtro por fecha hasta
+                if (fechaHasta.HasValue)
+                {
+                    consulta = consulta.Where(i =>
+                        i.FechaAusencia <= fechaHasta.Value);
+                }
+
+                // Filtro por tipo
+                if (!string.IsNullOrEmpty(tipo))
+                {
+                    consulta = consulta.Where(i =>
+                        i.Tipo == tipo);
+                }
+
+                var inasistenciasAdmin = await consulta
+                    .OrderByDescending(i => i.FechaAusencia)
+                    .ToListAsync();
+
+                return View(inasistenciasAdmin);
+            }
+
+            // Obtenemos el ID del usuario logueado
+            var idUsuarioClaim = User.FindFirstValue(
+                ClaimTypes.NameIdentifier
+            );
+
+            if (!int.TryParse(idUsuarioClaim, out int idUsuario))
+            {
+                return Unauthorized();
+            }
+
+            // El vendedor solamente ve sus propias inasistencias
             var inasistencias = await _context.Inasistencias
+                .Where(i => i.IdUsuario == idUsuario)
                 .OrderByDescending(i => i.FechaAusencia)
                 .ToListAsync();
 
@@ -96,7 +145,7 @@ namespace TeaMall.Controllers
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Create));
+            return RedirectToAction(nameof(Index));
         }
     }
 }
