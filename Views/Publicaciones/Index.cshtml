@@ -62,11 +62,29 @@ else
 
                         @if (!string.IsNullOrEmpty(publicacion.Archivo))
                         {
-                            <a href="@publicacion.Archivo"
-                               target="_blank"
-                               class="btn btn-outline-primary btn-sm">
-                                📎 Ver archivo
-                            </a>
+                            string extension = System.IO.Path.GetExtension(publicacion.Archivo).ToLowerInvariant();
+
+                            if (extension == ".jpg" ||
+                                extension == ".jpeg" ||
+                                extension == ".png" ||
+                                extension == ".gif" ||
+                                extension == ".webp")
+                            {
+                                <div class="mb-3 text-center">
+                                    <img src="@publicacion.Archivo"
+                                        alt="@publicacion.Titulo"
+                                        class="img-fluid rounded"
+                                        style="max-height: 250px; object-fit: contain;" />
+                                </div>
+                            }
+                            else
+                            {
+                                <a href="@publicacion.Archivo"
+                                target="_blank"
+                                class="btn btn-outline-primary btn-sm">
+                                    📎 Ver archivo
+                                </a>
+                            }
                         }
                         else
                         {

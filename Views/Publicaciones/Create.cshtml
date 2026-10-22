@@ -63,7 +63,7 @@
             </div>
             <div class="mb-3">
                 <label asp-for="ArchivoSubido" class="form-label">Archivo</label>
-                <input asp-for="ArchivoSubido" type="file" class="form-control" />
+                <input asp-for="ArchivoSubido" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.xls,.xlsx,.zip,.rar" />
                 <span asp-validation-for="ArchivoSubido" class="text-danger"></span>
             </div>
 

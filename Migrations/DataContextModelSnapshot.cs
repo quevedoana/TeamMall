@@ -88,6 +88,9 @@ namespace TeaMall.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("IdNotificacion"));
 
+                    b.Property<DateTime?>("FechaAccesoPublicacion")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("datetime(6)");
 
@@ -176,14 +179,16 @@ namespace TeaMall.Migrations
 
                     b.Property<string>("Apellido")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Avatar")
                         .HasColumnType("longtext");
 
                     b.Property<string>("Contrasenia")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<string>("DNI")
                         .IsRequired()
@@ -191,14 +196,16 @@ namespace TeaMall.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
 
                     b.Property<int?>("IdLocal")
                         .HasColumnType("int");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Rol")
                         .IsRequired()

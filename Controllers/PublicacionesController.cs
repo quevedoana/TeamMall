@@ -168,17 +168,59 @@ namespace TeaMall.Controllers
             // Si el administrador seleccionó un archivo
             if (publicacion.ArchivoSubido != null)
             {
-                string extension = Path.GetExtension(publicacion.ArchivoSubido.FileName);
+                var extensionesPermitidas = new[]
+                {
+                    ".pdf",
+                    ".jpg",
+                    ".jpeg",
+                    ".png",
+                    ".gif",
+                    ".webp",
+                    ".doc",
+                    ".docx",
+                    ".xls",
+                    ".xlsx",
+                    ".zip",
+                    ".rar"
+                };
+
+                string extension = Path
+                    .GetExtension(publicacion.ArchivoSubido.FileName)
+                    .ToLowerInvariant();
+
+                // Verificamos que la extensión esté permitida
+                if (!extensionesPermitidas.Contains(extension))
+                {
+                    ModelState.AddModelError(
+                        "ArchivoSubido",
+                        "El tipo de archivo no está permitido. " +
+                        "Podés subir PDF, imágenes, Word, Excel, ZIP o RAR."
+                    );
+
+                    ViewBag.Locales = await _context.Locales
+                        .Where(l => l.Activo)
+                        .OrderBy(l => l.Nombre)
+                        .ToListAsync();
+
+                    return View(publicacion);
+                }
+
                 string nombreArchivo = Guid.NewGuid().ToString() + extension;
 
-                string rutaCompleta = Path.Combine(carpeta, nombreArchivo);
+                string rutaCompleta = Path.Combine(
+                    carpeta,
+                    nombreArchivo
+                );
 
-                using (var stream = new FileStream(rutaCompleta, FileMode.Create))
+                using (var stream = new FileStream(
+                    rutaCompleta,
+                    FileMode.Create))
                 {
                     await publicacion.ArchivoSubido.CopyToAsync(stream);
                 }
 
-                publicacion.Archivo = "/Uploads/Publicaciones/" + nombreArchivo;
+                publicacion.Archivo =
+                    "/Uploads/Publicaciones/" + nombreArchivo;
             }
 
             // Guardamos la publicación
@@ -252,6 +294,7 @@ namespace TeaMall.Controllers
         }
 
         // POST: Publicaciones/Edit/5
+        // POST: Publicaciones/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrador")]
@@ -267,14 +310,92 @@ namespace TeaMall.Controllers
                 return View(publicacion);
             }
 
+            var publicacionExistente = await _context.Publicaciones
+                .FirstOrDefaultAsync(p => p.IdPublicacion == id);
+
+            if (publicacionExistente == null)
+            {
+                return NotFound();
+            }
+
+            // Actualizamos los datos de la publicación
+            publicacionExistente.Titulo = publicacion.Titulo;
+            publicacionExistente.Descripcion = publicacion.Descripcion;
+            publicacionExistente.Tipo = publicacion.Tipo;
+
+            // Si se seleccionó un archivo nuevo
+            if (publicacion.ArchivoSubido != null)
+            {
+                var extensionesPermitidas = new[]
+                {
+                    ".pdf",
+                    ".jpg",
+                    ".jpeg",
+                    ".png",
+                    ".gif",
+                    ".webp",
+                    ".doc",
+                    ".docx",
+                    ".xls",
+                    ".xlsx",
+                    ".zip",
+                    ".rar"
+                };
+
+                string extension = System.IO.Path
+                    .GetExtension(publicacion.ArchivoSubido.FileName)
+                    .ToLowerInvariant();
+
+                // Verificamos que la extensión esté permitida
+                if (!extensionesPermitidas.Contains(extension))
+                {
+                    ModelState.AddModelError(
+                        "ArchivoSubido",
+                        "El tipo de archivo no está permitido. " +
+                        "Podés subir PDF, imágenes, Word, Excel, ZIP o RAR."
+                    );
+
+                    return View(publicacion);
+                }
+
+                string carpeta = Path.Combine(
+                    Directory.GetCurrentDirectory(),
+                    "wwwroot",
+                    "Uploads",
+                    "Publicaciones"
+                );
+
+                if (!Directory.Exists(carpeta))
+                {
+                    Directory.CreateDirectory(carpeta);
+                }
+
+                string nombreArchivo =
+                    Guid.NewGuid().ToString() + extension;
+
+                string rutaCompleta = Path.Combine(
+                    carpeta,
+                    nombreArchivo
+                );
+
+                using (var stream = new FileStream(
+                    rutaCompleta,
+                    FileMode.Create))
+                {
+                    await publicacion.ArchivoSubido.CopyToAsync(stream);
+                }
+
+                publicacionExistente.Archivo =
+                    "/Uploads/Publicaciones/" + nombreArchivo;
+            }
+
             try
             {
-                _context.Update(publicacion);
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!PublicacionExists(publicacion.IdPublicacion))
+                if (!PublicacionExists(publicacionExistente.IdPublicacion))
                 {
                     return NotFound();
                 }
