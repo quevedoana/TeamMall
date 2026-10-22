@@ -7,19 +7,23 @@
     <form id="formToken" class="d-none">
         @Html.AntiForgeryToken()
     </form>
+
     <div class="tm-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
             <h1 class="mb-1">Locales</h1>
-            <p class="text-muted mb-0">Administrá los locales asociados a TeamMall.</p>
+            <p class="text-muted mb-0">
+                Administrá los locales asociados a TeamMall.
+            </p>
         </div>
 
-        <a href="@Url.Action("Create", "Locales")" class="btn tm-btn-primary">
+        <a href="@Url.Action("Create", "Locales")"
+           class="btn tm-btn-primary">
             <span class="me-2">+</span> Nuevo local
         </a>
     </div>
 
     <div class="tm-card">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
             <div>
                 <h5 class="mb-1">Listado de locales</h5>
                 <p class="text-muted small mb-0">
@@ -27,9 +31,61 @@
                 </p>
             </div>
 
-            <span class="badge rounded-pill text-bg-light border">
-                Total: {{ locales.length }}
-            </span>
+            <div class="tm-local-search">
+                <label for="buscarLocal" class="form-label small fw-semibold mb-2">
+                    Buscar locales
+                </label>
+
+                <div class="tm-search-input">
+                    <span class="tm-search-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"
+                             width="19"
+                             height="19"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2"
+                             stroke-linecap="round">
+                            <circle cx="10.8" cy="10.8" r="6.8"></circle>
+                            <path d="m16 16 4.5 4.5"></path>
+                        </svg>
+                    </span>
+
+                    <input id="buscarLocal"
+                           type="search"
+                           v-model="busqueda"
+                           class="form-control"
+                           placeholder="Nombre del local..."
+                           aria-label="Buscar locales por nombre"
+                           autocomplete="off" />
+
+                    <button v-if="busqueda"
+                            type="button"
+                            class="tm-search-clear"
+                            aria-label="Limpiar búsqueda"
+                            title="Limpiar búsqueda"
+                            v-on:click="busqueda = ''">
+                        <svg viewBox="0 0 24 24"
+                             width="16"
+                             height="16"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2"
+                             stroke-linecap="round">
+                            <path d="m18 6-12 12M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="tm-search-results">
+                    <span class="tm-search-dot"></span>
+                    <span>
+                        {{ localesFiltrados.length }}
+                        {{ localesFiltrados.length === 1
+                            ? 'local encontrado'
+                            : 'locales encontrados' }}
+                    </span>
+                </div>
+            </div>
         </div>
 
         <div v-if="cargando" class="text-center py-5">
@@ -38,6 +94,7 @@
 
         <div v-else-if="error" class="alert alert-danger">
             {{ error }}
+
             <button type="button"
                     class="btn btn-sm btn-outline-danger ms-2"
                     v-on:click="cargarLocales">
@@ -45,11 +102,25 @@
             </button>
         </div>
 
-        <div v-else-if="locales.length === 0" class="text-center py-5">
+        <div v-else-if="localesFiltrados.length === 0"
+             class="text-center py-5">
+
             <div class="mb-3" style="font-size: 2.5rem;">🏬</div>
-            <h5>Todavía no hay locales</h5>
-            <p class="text-muted">Creá el primer local para comenzar.</p>
-            <a href="@Url.Action("Create", "Locales")"
+
+            <h5>
+                {{ busqueda
+                    ? 'No se encontraron locales'
+                    : 'Todavía no hay locales' }}
+            </h5>
+
+            <p class="text-muted">
+                {{ busqueda
+                    ? 'Probá con otro nombre.'
+                    : 'Creá el primer local para comenzar.' }}
+            </p>
+
+            <a v-if="!busqueda"
+               href="@Url.Action("Create", "Locales")"
                class="btn tm-btn-primary">
                 Crear local
             </a>
@@ -66,12 +137,18 @@
                 </thead>
 
                 <tbody>
-                    <tr v-for="local in locales" v-bind:key="local.idLocal">
+                    <tr v-for="local in localesFiltrados"
+                        v-bind:key="local.idLocal">
+
                         <td>
                             <div class="d-flex align-items-center gap-3">
                                 <div class="tm-local-icon">🏬</div>
+
                                 <div>
-                                    <div class="fw-semibold">{{ local.nombre }}</div>
+                                    <div class="fw-semibold">
+                                        {{ local.nombre }}
+                                    </div>
+
                                     <div class="text-muted small">
                                         ID: {{ local.idLocal }}
                                     </div>
@@ -80,11 +157,15 @@
                         </td>
 
                         <td>
-                            <span v-if="local.activo" class="tm-badge-active">
-                                <span class="tm-status-dot"></span> Activo
+                            <span v-if="local.activo"
+                                  class="tm-badge-active">
+                                <span class="tm-status-dot"></span>
+                                Activo
                             </span>
+
                             <span v-else class="tm-badge-inactive">
-                                <span class="tm-status-dot"></span> Inactivo
+                                <span class="tm-status-dot"></span>
+                                Inactivo
                             </span>
                         </td>
 
@@ -119,8 +200,19 @@
                 return {
                     locales: [],
                     cargando: true,
-                    error: ''
+                    error: '',
+                    busqueda: ''
                 };
+            },
+
+            computed: {
+                localesFiltrados() {
+                    const texto = this.busqueda.trim().toLowerCase();
+
+                    return this.locales.filter(local =>
+                        (local.nombre || '').toLowerCase().includes(texto)
+                    );
+                }
             },
 
             methods: {
@@ -129,7 +221,9 @@
                     this.error = '';
 
                     try {
-                        const respuesta = await fetch('@Url.Action("Listar", "Locales")');
+                        const respuesta = await fetch(
+                            '@Url.Action("Listar", "Locales")'
+                        );
 
                         if (!respuesta.ok) {
                             throw new Error(
@@ -139,68 +233,79 @@
                         }
 
                         this.locales = await respuesta.json();
+
                     } catch (error) {
                         console.error('Error al cargar locales:', error);
+
                         this.error = error.message ||
                             'Ocurrió un error al cargar los locales.';
+
                     } finally {
                         this.cargando = false;
                     }
                 },
 
-                
-    async desactivar(idLocal) {
-        if (!confirm('¿Seguro que querés desactivar este local?')) {
-        return;
-    }
+                async desactivar(idLocal) {
+                    if (!confirm('¿Seguro que querés desactivar este local?')) {
+                        return;
+                    }
 
-    const tokenInput = document.querySelector(
-        '#formToken input[name="__RequestVerificationToken"]'
-    );
+                    const tokenInput = document.querySelector(
+                        '#formToken input[name="__RequestVerificationToken"]'
+                    );
 
-    if (!tokenInput) {
-        alert('No se encontró el token de seguridad. Recargá la página.');
-        return;
-    }
+                    if (!tokenInput) {
+                        alert(
+                            'No se encontró el token de seguridad. Recargá la página.'
+                        );
+                        return;
+                    }
 
-    try {
-        const respuesta = await fetch(
-    '@Url.Action("Desactivar", "Locales", new { id = "__ID__" })'
-        .replace('__ID__', idLocal),
-    {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({
-            '__RequestVerificationToken': tokenInput.value
-        })
-    }
-);
+                    try {
+                        const urlDesactivar =
+                            '@Url.Action("Desactivar", "Locales", new { id = "__ID__" })'
+                                .replace('__ID__', idLocal);
 
-        if (!respuesta.ok) {
-            throw new Error(
-                'No se pudo desactivar el local. Código: ' + respuesta.status
-            );
-        }
+                        const respuesta = await fetch(urlDesactivar, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type':
+                                    'application/x-www-form-urlencoded'
+                            },
+                            body: new URLSearchParams({
+                                '__RequestVerificationToken':
+                                    tokenInput.value
+                            })
+                        });
 
-        const resultado = await respuesta.json();
+                        if (!respuesta.ok) {
+                            throw new Error(
+                                'No se pudo desactivar el local. Código: ' +
+                                respuesta.status
+                            );
+                        }
 
-        const local = this.locales.find(
-            l => l.idLocal === resultado.idLocal
-        );
+                        const resultado = await respuesta.json();
 
-        if (local) {
-            local.activo = false;
-        }
+                        const local = this.locales.find(
+                            l => l.idLocal === resultado.idLocal
+                        );
 
-        alert(resultado.mensaje);
-    } catch (error) {
-        console.error('Error al desactivar:', error);
-        alert(error.message || 'Ocurrió un error al desactivar el local.');
-    }
-}
+                        if (local) {
+                            local.activo = false;
+                        }
 
+                        alert(resultado.mensaje);
+
+                    } catch (error) {
+                        console.error('Error al desactivar:', error);
+
+                        alert(
+                            error.message ||
+                            'Ocurrió un error al desactivar el local.'
+                        );
+                    }
+                }
             },
 
             mounted() {
