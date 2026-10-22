@@ -29,6 +29,11 @@ builder.Services
 // Servicios MVC
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "RequestVerificationToken";
+});
+
 var app = builder.Build();
 
 // Configuración del pipeline HTTP
