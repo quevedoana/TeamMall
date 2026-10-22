@@ -2,87 +2,144 @@
 
 @{
     ViewData["Title"] = "Inasistencias";
+    var usuarios = ViewBag.Usuarios as Dictionary<int, string>;
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="mb-1">Inasistencias</h1>
+        <h1 class="mb-1" style="color: #063B2C;">
+            Inasistencias
+        </h1>
+
         <p class="text-muted mb-0">
-            Gestión de inasistencias y justificaciones
+            Gestión de inasistencias y justificaciones.
         </p>
     </div>
 
-    <a asp-action="Create" class="btn btn-primary">
+    <a asp-action="Create"
+       class="btn px-4 py-2"
+       style="background-color: #063B2C; color: white; border-radius: 8px;">
         + Nueva inasistencia
     </a>
 </div>
 
 @if (User.IsInRole("Administrador"))
 {
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
 
-            <h5 class="card-title mb-3">
-                Filtrar inasistencias
-            </h5>
+        <div class="card-body p-4">
+
+            <div class="mb-3">
+
+                <h5 class="mb-1 fw-semibold"
+                    style="color: #063B2C;">
+                    Filtrar inasistencias
+                </h5>
+
+                <p class="text-muted small mb-0">
+                    Consultá las inasistencias según fecha y tipo.
+                </p>
+
+            </div>
 
             <form asp-action="Index" method="get">
 
-                <div class="row g-3">
+                <div class="row g-3 align-items-end">
 
                     <div class="col-md-3">
-                        <label class="form-label">
+
+                        <label class="form-label small fw-semibold">
                             Fecha desde
                         </label>
 
                         <input type="date"
                                name="fechaDesde"
-                               class="form-control" />
+                               class="form-control"
+                               value="@Context.Request.Query["fechaDesde"]" />
+
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label">
+
+                        <label class="form-label small fw-semibold">
                             Fecha hasta
                         </label>
 
                         <input type="date"
                                name="fechaHasta"
-                               class="form-control" />
+                               class="form-control"
+                               value="@Context.Request.Query["fechaHasta"]" />
+
                     </div>
 
                     <div class="col-md-3">
-                        <label class="form-label">
+
+                        <label class="form-label small fw-semibold">
                             Tipo
                         </label>
 
                         <select name="tipo" class="form-select">
 
-                            <option value="">
-                                Todos
-                            </option>
+                            @if (string.IsNullOrEmpty(Context.Request.Query["tipo"]))
+                            {
+                                <option value="" selected>
+                                    Todos
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="">
+                                    Todos
+                                </option>
+                            }
 
-                            <option value="Certificado médico">
-                                Certificado médico
-                            </option>
+                            @if (Context.Request.Query["tipo"] == "Certificado médico")
+                            {
+                                <option value="Certificado médico" selected>
+                                    Certificado médico
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="Certificado médico">
+                                    Certificado médico
+                                </option>
+                            }
 
-                            <option value="Justificación">
-                                Justificación
-                            </option>
+                            @if (Context.Request.Query["tipo"] == "Justificación")
+                            {
+                                <option value="Justificación" selected>
+                                    Justificación
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="Justificación">
+                                    Justificación
+                                </option>
+                            }
 
                         </select>
+
                     </div>
 
-                    <div class="col-md-3 d-flex align-items-end">
+                    <div class="col-md-3">
 
-                        <button type="submit"
-                                class="btn btn-primary me-2">
-                            Buscar
-                        </button>
+                        <div class="d-flex gap-2">
 
-                        <a asp-action="Index"
-                           class="btn btn-secondary">
-                            Limpiar
-                        </a>
+                            <button type="submit"
+                                    class="btn px-4"
+                                    style="background-color: #063B2C; color: white; border-radius: 8px;">
+                                Buscar
+                            </button>
+
+                            <a asp-action="Index"
+                               class="btn px-4"
+                               style="border: 1px solid #063B2C; color: #063B2C; border-radius: 8px;">
+                                Limpiar
+                            </a>
+
+                        </div>
 
                     </div>
 
@@ -91,102 +148,329 @@
             </form>
 
         </div>
+
     </div>
 }
 
 @if (!Model.Any())
 {
-    <div class="alert alert-info">
-        No hay inasistencias cargadas.
+    <div class="card border-0 shadow-sm rounded-4">
+
+        <div class="card-body text-center py-5">
+
+            <div class="mb-3"
+                 style="font-size: 38px;">
+                📋
+            </div>
+
+            <h5 class="mb-2"
+                style="color: #063B2C;">
+                No hay inasistencias
+            </h5>
+
+            <p class="text-muted mb-0">
+                Todavía no se han registrado inasistencias.
+            </p>
+
+        </div>
+
     </div>
 }
 else
 {
-    <div class="table-responsive">
+    <div class="card border-0 shadow-sm rounded-4">
 
-        <table class="table table-hover align-middle">
+        <div class="card-body p-0">
 
-            <thead>
-                <tr>
-                    <th>Usuario</th>
-                    <th>Tipo</th>
-                    <th>Fecha de ausencia</th>
-                    <th>Fecha de carga</th>
-                    <th>Comentario</th>
-                    <th>Archivo</th>
-                    <th>Estado</th>
-                </tr>
-            </thead>
+            <div class="d-flex justify-content-between align-items-center p-4 border-bottom">
 
-            <tbody>
+                <div>
 
-                @foreach (var inasistencia in Model)
-                {
-                    <tr>
+                    <h5 class="mb-1 fw-semibold"
+                        style="color: #063B2C;">
+                        Listado de inasistencias
+                    </h5>
 
-                        <td>
-                            @inasistencia.IdUsuario
-                        </td>
+                    <p class="text-muted small mb-0">
+                        Consultá las inasistencias registradas.
+                    </p>
 
-                        <td>
-                            @inasistencia.Tipo
-                        </td>
+                </div>
 
-                        <td>
-                            @inasistencia.FechaAusencia.ToString("dd/MM/yyyy")
-                        </td>
+                <span class="badge rounded-pill bg-light text-dark border px-3 py-2">
+                    Total: @ViewBag.TotalRegistros
+                </span>
 
-                        <td>
-                            @inasistencia.FechaCarga.ToString("dd/MM/yyyy HH:mm")
-                        </td>
+            </div>
 
-                        <td>
-                            @inasistencia.Comentario
-                        </td>
+            <div class="table-responsive">
 
-                        <td>
+                <table class="table table-hover align-middle mb-0">
 
-                            @if (!string.IsNullOrEmpty(
-                                inasistencia.Archivo))
-                            {
-                                <a href="@inasistencia.Archivo"
-                                   target="_blank"
-                                   class="btn btn-outline-primary btn-sm">
-                                    Ver archivo
+                    <thead>
+
+                        <tr>
+
+                            <th class="px-4 py-3">
+                                USUARIO
+                            </th>
+
+                            <th class="py-3">
+                                TIPO
+                            </th>
+
+                            <th class="py-3">
+                                FECHA DE AUSENCIA
+                            </th>
+
+                            <th class="py-3">
+                                FECHA DE CARGA
+                            </th>
+
+                            <th class="py-3">
+                                COMENTARIO
+                            </th>
+
+                            <th class="py-3">
+                                ARCHIVO
+                            </th>
+
+                            <th class="py-3">
+                                ESTADO
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var inasistencia in Model)
+                        {
+                            <tr>
+
+                                <td class="px-4">
+
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        <div class="rounded-circle d-flex align-items-center justify-content-center"
+                                             style="width: 36px;
+                                                    height: 36px;
+                                                    background-color: #E8F5E9;
+                                                    color: #063B2C;
+                                                    font-weight: 600;">
+
+                                            @if (usuarios != null &&
+                                                 usuarios.ContainsKey(inasistencia.IdUsuario))
+                                            {
+                                                @usuarios[inasistencia.IdUsuario].Substring(0, 1).ToUpper()
+                                            }
+                                            else
+                                            {
+                                                <span>U</span>
+                                            }
+
+                                        </div>
+
+                                        <div>
+
+                                            @if (usuarios != null &&
+                                                 usuarios.ContainsKey(inasistencia.IdUsuario))
+                                            {
+                                                <div class="fw-semibold"
+                                                     style="color: #063B2C;">
+                                                    @usuarios[inasistencia.IdUsuario]
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="fw-semibold">
+                                                    Usuario
+                                                </div>
+
+                                                <small class="text-muted">
+                                                    ID: @inasistencia.IdUsuario
+                                                </small>
+                                            }
+
+                                        </div>
+
+                                    </div>
+
+                                </td>
+
+                                <td>
+
+                                    @if (inasistencia.Tipo == "Certificado médico")
+                                    {
+                                        <span class="badge rounded-pill"
+                                              style="background-color: #E8F5E9;
+                                                     color: #287A43;">
+                                            Certificado médico
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill"
+                                              style="background-color: #FFF4E5;
+                                                     color: #9A6700;">
+                                            Justificación
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <td>
+
+                                    <span class="fw-medium">
+                                        @inasistencia.FechaAusencia.ToString("dd/MM/yyyy")
+                                    </span>
+
+                                </td>
+
+                                <td>
+
+                                    <span class="text-muted">
+                                        @inasistencia.FechaCarga.ToString("dd/MM/yyyy")
+                                    </span>
+
+                                    <br />
+
+                                    <small class="text-muted">
+                                        @inasistencia.FechaCarga.ToString("HH:mm")
+                                    </small>
+
+                                </td>
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(inasistencia.Comentario))
+                                    {
+                                        <span>
+                                            @inasistencia.Comentario
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">
+                                            Sin comentario
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <td>
+
+                                    @if (!string.IsNullOrEmpty(inasistencia.Archivo))
+                                    {
+                                        <a href="@inasistencia.Archivo"
+                                           target="_blank"
+                                           class="btn btn-sm px-3"
+                                           style="border: 1px solid #063B2C;
+                                                  color: #063B2C;
+                                                  border-radius: 7px;">
+                                            Ver archivo
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">
+                                            Sin archivo
+                                        </span>
+                                    }
+
+                                </td>
+
+                                <td>
+
+                                    @if (inasistencia.Estado == "Pendiente")
+                                    {
+                                        <span class="badge rounded-pill"
+                                              style="background-color: #FFF3CD;
+                                                     color: #856404;">
+                                            Pendiente
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge rounded-pill bg-success">
+                                            @inasistencia.Estado
+                                        </span>
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            @if (ViewBag.TotalPaginas > 1)
+            {
+                <div class="d-flex justify-content-between align-items-center p-4 border-top">
+
+                    <div class="text-muted small">
+                        Página @ViewBag.PaginaActual de @ViewBag.TotalPaginas
+                    </div>
+
+                    <nav aria-label="Paginación de inasistencias">
+
+                        <ul class="pagination mb-0">
+
+                            <li class="page-item @(ViewBag.PaginaActual == 1 ? "disabled" : "")">
+
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-route-pagina="@(ViewBag.PaginaActual - 1)"
+                                   asp-route-fechaDesde="@ViewBag.FechaDesde"
+                                   asp-route-fechaHasta="@ViewBag.FechaHasta"
+                                   asp-route-tipo="@ViewBag.Tipo">
+                                    Anterior
                                 </a>
-                            }
-                            else
+
+                            </li>
+
+                            @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
                             {
-                                <span class="text-muted">
-                                    Sin archivo
-                                </span>
+                                <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
+
+                                    <a class="page-link"
+                                       asp-action="Index"
+                                       asp-route-pagina="@i"
+                                       asp-route-fechaDesde="@ViewBag.FechaDesde"
+                                       asp-route-fechaHasta="@ViewBag.FechaHasta"
+                                       asp-route-tipo="@ViewBag.Tipo">
+                                        @i
+                                    </a>
+
+                                </li>
                             }
 
-                        </td>
+                            <li class="page-item @(ViewBag.PaginaActual == ViewBag.TotalPaginas ? "disabled" : "")">
 
-                        <td>
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-route-pagina="@(ViewBag.PaginaActual + 1)"
+                                   asp-route-fechaDesde="@ViewBag.FechaDesde"
+                                   asp-route-fechaHasta="@ViewBag.FechaHasta"
+                                   asp-route-tipo="@ViewBag.Tipo">
+                                    Siguiente
+                                </a>
 
-                            @if (inasistencia.Estado == "Pendiente")
-                            {
-                                <span class="badge bg-warning text-dark">
-                                    Pendiente
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-success">
-                                    @inasistencia.Estado
-                                </span>
-                            }
+                            </li>
 
-                        </td>
+                        </ul>
 
-                    </tr>
-                }
+                    </nav>
 
-            </tbody>
+                </div>
+            }
 
-        </table>
+        </div>
 
     </div>
 }

@@ -17,46 +17,100 @@ namespace TeaMall.Controllers
         }
 
         // GET: Publicaciones
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pagina = 1)
         {
+            const int publicacionesPorPagina = 10;
+
+            if (pagina < 1)
+            {
+                pagina = 1;
+            }
+
             // Si es administrador, puede ver todas las publicaciones
             if (User.IsInRole("Administrador"))
             {
-                var publicacionesAdmin = await _context.Publicaciones
+                var consulta = _context.Publicaciones
+                    .AsQueryable();
+
+                var totalPublicaciones = await consulta.CountAsync();
+
+                var totalPaginas = (int)Math.Ceiling(
+                    totalPublicaciones / (double)publicacionesPorPagina
+                );
+
+                if (totalPaginas > 0 && pagina > totalPaginas)
+                {
+                    pagina = totalPaginas;
+                }
+
+                var publicacionesAdmin = await consulta
                     .OrderByDescending(p => p.FechaPublicacion)
+                    .Skip((pagina - 1) * publicacionesPorPagina)
+                    .Take(publicacionesPorPagina)
                     .ToListAsync();
+
+                ViewBag.PaginaActual = pagina;
+                ViewBag.TotalPaginas = totalPaginas;
+                ViewBag.TotalPublicaciones = totalPublicaciones;
 
                 return View(publicacionesAdmin);
             }
 
             // Obtenemos el ID del usuario logueado
-            var idUsuarioClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var idUsuarioClaim = User.FindFirstValue(
+                ClaimTypes.NameIdentifier
+            );
 
             if (!int.TryParse(idUsuarioClaim, out int idUsuario))
             {
                 return Unauthorized();
             }
 
-            // Buscamos el local del vendedor
             var usuario = await _context.Usuarios
                 .FirstOrDefaultAsync(u => u.IdUsuario == idUsuario);
 
             if (usuario == null || !usuario.IdLocal.HasValue)
             {
+                ViewBag.PaginaActual = 1;
+                ViewBag.TotalPaginas = 0;
+                ViewBag.TotalPublicaciones = 0;
+
                 return View(new List<Publicacion>());
             }
 
             int idLocal = usuario.IdLocal.Value;
 
-            // Mostramos solamente las publicaciones dirigidas a su local
-            var publicaciones = await _context.Publicaciones
+            // El vendedor solamente ve publicaciones de su local
+            var consultaVendedor = _context.Publicaciones
                 .Where(p => _context.PublicacionesLocales
                     .Any(pl =>
                         pl.IdPublicacion == p.IdPublicacion &&
                         pl.IdLocal == idLocal
-                    ))
+                    ));
+
+            var totalPublicacionesVendedor =
+                await consultaVendedor.CountAsync();
+
+            var totalPaginasVendedor = (int)Math.Ceiling(
+                totalPublicacionesVendedor /
+                (double)publicacionesPorPagina
+            );
+
+            if (totalPaginasVendedor > 0 &&
+                pagina > totalPaginasVendedor)
+            {
+                pagina = totalPaginasVendedor;
+            }
+
+            var publicaciones = await consultaVendedor
                 .OrderByDescending(p => p.FechaPublicacion)
+                .Skip((pagina - 1) * publicacionesPorPagina)
+                .Take(publicacionesPorPagina)
                 .ToListAsync();
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginasVendedor;
+            ViewBag.TotalPublicaciones = totalPublicacionesVendedor;
 
             return View(publicaciones);
         }
