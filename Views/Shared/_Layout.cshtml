@@ -94,13 +94,15 @@
                         <span class="tm-nav-icon">▣</span>
                         <span>Inasistencias</span>
                     </a>
-
-                    <a asp-controller="Notificaciones"
-                       asp-action="Index"
-                       class="tm-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Notificaciones" ? "active" : "")">
-                        <span class="tm-nav-icon">♧</span>
-                        <span>Notificaciones</span>
-                    </a>
+                    @if (User.IsInRole("Vendedor"))
+                    {
+                        <a asp-controller="Notificaciones"
+                        asp-action="Index"
+                        class="tm-nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Notificaciones" ? "active" : "")">
+                            <span class="tm-nav-icon">♧</span>
+                            <span>Notificaciones</span>
+                        </a>
+                    }
 
                 </nav>
 

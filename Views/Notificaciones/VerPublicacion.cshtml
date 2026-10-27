@@ -73,8 +73,12 @@
                 extension == ".webp")
             {
                 <div class="tm-notificacion-publicacion-imagen">
+
                     <img src="@Model.Archivo"
-                         alt="@Model.Titulo" />
+                        alt="@Model.Titulo"
+                        class="tm-imagen-publicacion-ampliable"
+                        onclick="abrirImagenPublicacion(this.src)" />
+
                 </div>
             }
             else
@@ -122,3 +126,52 @@
     </div>
 
 </div>
+<div id="tm-modal-imagen"
+     class="tm-modal-imagen"
+     onclick="cerrarImagenPublicacion()">
+
+    <span class="tm-modal-imagen-cerrar">
+        &times;
+    </span>
+
+    <img id="tm-modal-imagen-contenido"
+         src=""
+         alt="Imagen ampliada"
+         onclick="event.stopPropagation()" />
+
+</div>
+
+@section Scripts {
+
+    <script>
+
+        function abrirImagenPublicacion(src) {
+
+            const modal = document.getElementById("tm-modal-imagen");
+            const imagen = document.getElementById("tm-modal-imagen-contenido");
+
+            imagen.src = src;
+
+            modal.classList.add("tm-modal-imagen-visible");
+        }
+
+        function cerrarImagenPublicacion() {
+
+            const modal = document.getElementById("tm-modal-imagen");
+
+            modal.classList.remove("tm-modal-imagen-visible");
+        }
+
+        document.addEventListener("keydown", function (event) {
+
+            if (event.key === "Escape") {
+
+                cerrarImagenPublicacion();
+
+            }
+
+        });
+
+    </script>
+
+}

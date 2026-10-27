@@ -2604,3 +2604,69 @@ body.tm-body {
     }
 
 }
+
+/* =========================================
+   VISOR DE IMÁGENES DE PUBLICACIONES
+   ========================================= */
+
+.tm-imagen-publicacion-ampliable {
+    cursor: pointer;
+}
+
+.tm-modal-imagen {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.85);
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 30px;
+}
+
+.tm-modal-imagen-visible {
+    display: flex;
+}
+
+.tm-modal-imagen-contenido {
+    max-width: 90%;
+    max-height: 90vh;
+    object-fit: contain;
+}
+
+#tm-modal-imagen-contenido {
+    max-width: 90%;
+    max-height: 90vh;
+    object-fit: contain;
+
+    border-radius: 8px;
+}
+
+.tm-modal-imagen-cerrar {
+    position: absolute;
+
+    top: 20px;
+    right: 30px;
+
+    color: white;
+
+    font-size: 42px;
+    font-weight: 300;
+
+    cursor: pointer;
+
+    line-height: 1;
+
+    transition: opacity 0.2s ease;
+}
+
+.tm-modal-imagen-cerrar:hover {
+    opacity: 0.7;
+}
+
+.tm-imagen-publicacion-ampliable:hover {
+    opacity: 0.92;
+}
