@@ -1,0 +1,200 @@
+@model TeaMall.Models.Publicacion
+
+@{
+    ViewData["Title"] = "Editar publicación";
+}
+
+<div class="tm-page-header">
+    <div>
+        <h1 class="tm-page-title">Editar publicación</h1>
+
+        <p class="tm-page-description">
+            Modificá los datos de la publicación seleccionada.
+        </p>
+    </div>
+
+    <a asp-action="Index"
+       class="tm-btn-secondary">
+        Volver
+    </a>
+</div>
+
+
+<div class="tm-card tm-publicacion-form-card">
+
+    <form asp-action="Edit"
+          asp-route-id="@Model.IdPublicacion"
+          method="post"
+          enctype="multipart/form-data">
+
+        <input type="hidden"
+               asp-for="IdPublicacion" />
+
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-4">
+        </div>
+
+
+        <!-- TÍTULO -->
+        <div class="tm-form-group">
+
+            <label asp-for="Titulo"
+                   class="tm-form-label">
+                Título
+            </label>
+
+            <input asp-for="Titulo"
+                   class="form-control"
+                   placeholder="Ingresá el título de la publicación" />
+
+            <span asp-validation-for="Titulo"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- DESCRIPCIÓN -->
+        <div class="tm-form-group">
+
+            <label asp-for="Descripcion"
+                   class="tm-form-label">
+                Descripción
+            </label>
+
+            <textarea asp-for="Descripcion"
+                      class="form-control tm-publicacion-textarea"
+                      placeholder="Ingresá la descripción de la publicación">
+            </textarea>
+
+            <span asp-validation-for="Descripcion"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- TIPO -->
+        <div class="tm-form-group">
+
+            <label asp-for="Tipo"
+                   class="tm-form-label">
+                Tipo de publicación
+            </label>
+
+            <select asp-for="Tipo"
+                    class="form-select">
+
+                <option value="">
+                    Seleccione un tipo
+                </option>
+
+                <option value="Manual">
+                    Manual
+                </option>
+
+                <option value="Capacitacion">
+                    Capacitación
+                </option>
+
+                <option value="Novedad">
+                    Novedad
+                </option>
+
+                <option value="Comunicacion">
+                    Comunicación
+                </option>
+
+            </select>
+
+            <span asp-validation-for="Tipo"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- ARCHIVO ACTUAL -->
+        <div class="tm-form-group">
+
+            <label class="tm-form-label">
+                Archivo actual
+            </label>
+
+            @if (!string.IsNullOrEmpty(Model.Archivo))
+            {
+                <div class="tm-publicacion-archivo-actual">
+
+                    <span class="tm-publicacion-archivo-icono">
+                        📎
+                    </span>
+
+                    <a href="@Model.Archivo"
+                       target="_blank">
+                        Ver archivo actual
+                    </a>
+
+                </div>
+            }
+            else
+            {
+                <div class="tm-publicacion-sin-archivo">
+                    <span>
+                        Esta publicación no tiene un archivo adjunto.
+                    </span>
+                </div>
+            }
+
+        </div>
+
+
+        <!-- NUEVO ARCHIVO -->
+        <div class="tm-form-group">
+
+            <label asp-for="ArchivoSubido"
+                   class="tm-form-label">
+                Reemplazar archivo
+            </label>
+
+            <p class="tm-form-help">
+                Si seleccionás un archivo, reemplazará al archivo actual.
+                Podés subir PDF, imágenes, Word, Excel, ZIP o RAR.
+            </p>
+
+            <input asp-for="ArchivoSubido"
+                   class="form-control"
+                   accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.xls,.xlsx,.zip,.rar" />
+
+            <span asp-validation-for="ArchivoSubido"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- BOTONES -->
+        <div class="tm-publicacion-form-actions">
+
+            <a asp-action="Index"
+               class="tm-btn-secondary">
+                Cancelar
+            </a>
+
+            <button type="submit"
+                    class="tm-btn-primary">
+                Guardar cambios
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+}

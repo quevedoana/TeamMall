@@ -157,7 +157,9 @@ namespace TeaMall.Controllers
                 return View(inasistencia);
             }
 
-            var idUsuarioClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var idUsuarioClaim = User.FindFirstValue(
+                ClaimTypes.NameIdentifier
+            );
 
             if (!int.TryParse(idUsuarioClaim, out int idUsuario))
             {
@@ -172,6 +174,32 @@ namespace TeaMall.Controllers
             // Guardar archivo si se seleccionó uno
             if (ArchivoSubido != null && ArchivoSubido.Length > 0)
             {
+                var extensionesPermitidas = new[]
+                {
+                    ".pdf",
+                    ".jpg",
+                    ".jpeg",
+                    ".png",
+                    ".gif",
+                    ".webp"
+                };
+
+                string extension = Path
+                    .GetExtension(ArchivoSubido.FileName)
+                    .ToLowerInvariant();
+
+                // Verificamos que el archivo sea una imagen o PDF
+                if (!extensionesPermitidas.Contains(extension))
+                {
+                    ModelState.AddModelError(
+                        "ArchivoSubido",
+                        "El tipo de archivo no está permitido. " +
+                        "Solo podés subir PDF o imágenes."
+                    );
+
+                    return View(inasistencia);
+                }
+
                 string carpeta = Path.Combine(
                     _environment.WebRootPath,
                     "Uploads",
@@ -183,8 +211,8 @@ namespace TeaMall.Controllers
                     Directory.CreateDirectory(carpeta);
                 }
 
-                string extension = Path.GetExtension(ArchivoSubido.FileName);
-                string nombreArchivo = $"{Guid.NewGuid()}{extension}";
+                string nombreArchivo =
+                    $"{Guid.NewGuid()}{extension}";
 
                 string rutaArchivo = Path.Combine(
                     carpeta,

@@ -5,120 +5,230 @@
     var publicacion = ViewBag.Publicacion as TeaMall.Models.Publicacion;
 }
 
-<div class="container mt-4">
+<div class="tm-page-header">
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2>Accesos a la publicación</h2>
+    <div>
 
-            @if (publicacion != null)
-            {
-                <p class="text-muted mb-0">
-                    @publicacion.Titulo
-                </p>
-            }
-        </div>
+        <h1 class="tm-page-title">
+            Accesos a la publicación
+        </h1>
 
-        <a asp-action="Index" class="btn btn-secondary">
-            Volver
-        </a>
+        @if (publicacion != null)
+        {
+            <p class="tm-page-description">
+                @publicacion.Titulo
+            </p>
+        }
+
     </div>
 
-    <div class="card shadow-sm">
+    <a asp-action="Index"
+       class="tm-btn-secondary">
+        Volver
+    </a>
 
-        <div class="card-body">
+</div>
 
-            @if (!Model.Any())
-            {
-                <div class="text-center py-4">
-                    <p class="text-muted mb-0">
-                        Ningún vendedor recibió esta publicación.
-                    </p>
-                </div>
-            }
-            else
-            {
-                <div class="table-responsive">
 
-                    <table class="table table-hover align-middle">
+<div class="tm-card tm-publicacion-accesos-card">
 
-                        <thead>
-                            <tr>
-                                <th>Vendedor</th>
-                                <th>Vio la notificación</th>
-                                <th>Accedió a la publicación</th>
-                            </tr>
-                        </thead>
+    @if (!Model.Any())
+    {
+        <div class="tm-publicacion-accesos-vacio">
 
-                        <tbody>
+            <div class="tm-publicacion-accesos-vacio-icono">
+                ✓
+            </div>
 
-                            @foreach (var acceso in Model)
-                            {
-                                <tr>
+            <h5>
+                Ningún vendedor recibió esta publicación
+            </h5>
 
-                                    <td>
-                                        <strong>
-                                            @acceso.Usuario
-                                        </strong>
-                                    </td>
+            <p>
+                Todavía no hay vendedores asociados a esta publicación.
+            </p>
 
-                                    <td>
-                                        @if (acceso.Leida)
-                                        {
-                                            <span class="text-success">
-                                                Sí
-                                            </span>
+        </div>
+    }
+    else
+    {
+        <div class="tm-publicacion-accesos-header">
+
+            <div>
+
+                <h5>
+                    Seguimiento de accesos
+                </h5>
+
+                <p>
+                    Consultá quién recibió la publicación y quién ingresó a ella.
+                </p>
+
+            </div>
+
+            <div class="tm-publicacion-accesos-total">
+
+                <span>
+                    @Model.Count()
+                </span>
+
+                <small>
+                    vendedor@(Model.Count() == 1 ? "" : "es")
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-responsive">
+
+            <table class="table tm-table tm-publicacion-accesos-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Vendedor
+                        </th>
+
+                        <th>
+                            Notificación
+                        </th>
+
+                        <th>
+                            Acceso a publicación
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @foreach (var acceso in Model)
+                    {
+                        <tr>
+
+                            <!-- VENDEDOR -->
+                            <td>
+
+                                <div class="tm-publicacion-vendedor">
+
+                                    <div class="tm-publicacion-vendedor-icono">
+                                        👤
+                                    </div>
+
+                                    <strong>
+                                        @acceso.Usuario
+                                    </strong>
+
+                                </div>
+
+                            </td>
+
+
+                            <!-- NOTIFICACIÓN -->
+                            <td>
+
+                                @if (acceso.Leida)
+                                {
+                                    <div class="tm-acceso-estado tm-acceso-si">
+
+                                        <span class="tm-acceso-indicador">
+                                            ✓
+                                        </span>
+
+                                        <div>
+
+                                            <strong>
+                                                Vista
+                                            </strong>
 
                                             @if (acceso.FechaLectura != null)
                                             {
-                                                <br />
-
-                                                <small class="text-muted">
+                                                <small>
                                                     @acceso.FechaLectura.ToString("dd/MM/yyyy HH:mm")
                                                 </small>
                                             }
-                                        }
-                                        else
-                                        {
-                                            <span class="text-danger">
-                                                No
-                                            </span>
-                                        }
-                                    </td>
 
-                                    <td>
-                                        @if (acceso.FechaAccesoPublicacion != null)
-                                        {
-                                            <span class="text-success">
-                                                Sí
-                                            </span>
+                                        </div>
 
-                                            <br />
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="tm-acceso-estado tm-acceso-no">
 
-                                            <small class="text-muted">
+                                        <span class="tm-acceso-indicador">
+                                            —
+                                        </span>
+
+                                        <div>
+                                            <strong>
+                                                No vista
+                                            </strong>
+                                        </div>
+
+                                    </div>
+                                }
+
+                            </td>
+
+
+                            <!-- ACCESO PUBLICACIÓN -->
+                            <td>
+
+                                @if (acceso.FechaAccesoPublicacion != null)
+                                {
+                                    <div class="tm-acceso-estado tm-acceso-si">
+
+                                        <span class="tm-acceso-indicador">
+                                            ✓
+                                        </span>
+
+                                        <div>
+
+                                            <strong>
+                                                Accedió
+                                            </strong>
+
+                                            <small>
                                                 @acceso.FechaAccesoPublicacion.ToString("dd/MM/yyyy HH:mm")
                                             </small>
-                                        }
-                                        else
-                                        {
-                                            <span class="text-danger">
-                                                No
-                                            </span>
-                                        }
-                                    </td>
 
-                                </tr>
-                            }
+                                        </div>
 
-                        </tbody>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="tm-acceso-estado tm-acceso-no">
 
-                    </table>
+                                        <span class="tm-acceso-indicador">
+                                            —
+                                        </span>
 
-                </div>
-            }
+                                        <div>
+                                            <strong>
+                                                No accedió
+                                            </strong>
+                                        </div>
+
+                                    </div>
+                                }
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
 
         </div>
-
-    </div>
+    }
 
 </div>

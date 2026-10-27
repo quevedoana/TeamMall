@@ -4,78 +4,366 @@
     ViewData["Title"] = "Nueva publicación";
 }
 
-<h1>Nueva publicación</h1>
+<div class="tm-page-header">
+    <div>
+        <h1 class="tm-page-title">Nueva publicación</h1>
 
-<hr />
+        <p class="tm-page-description">
+            Creá una nueva publicación para los locales seleccionados.
+        </p>
+    </div>
 
-<div class="row">
-    <div class="col-md-6">
+    <a asp-action="Index" class="tm-btn-secondary">
+        Volver
+    </a>
+</div>
 
-        <form asp-action="Create" method="post" enctype="multipart/form-data">
 
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div class="tm-card tm-publicacion-form-card">
 
-            <div class="mb-3">
-                <label asp-for="Titulo" class="form-label"></label>
-                <input asp-for="Titulo" class="form-control" />
-                <span asp-validation-for="Titulo" class="text-danger"></span>
-            </div>
+    <form asp-action="Create"
+          method="post"
+          enctype="multipart/form-data">
 
-            <div class="mb-3">
-                <label asp-for="Descripcion" class="form-label"></label>
-                <textarea asp-for="Descripcion" class="form-control"></textarea>
-                <span asp-validation-for="Descripcion" class="text-danger"></span>
-            </div>
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-4">
+        </div>
 
-            <div class="mb-3">
-                <label asp-for="Tipo" class="form-label"></label>
-                <select asp-for="Tipo" class="form-select">
-                    <option value="">Seleccione un tipo</option>
-                    <option value="Manual">Manual</option>
-                    <option value="Capacitacion">Capacitación</option>
-                    <option value="Novedad">Novedad</option>
-                    <option value="Comunicacion">Comunicación</option>
-                </select>
-                <span asp-validation-for="Tipo" class="text-danger"></span>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label">Locales destinatarios</label>
 
-                <div class="row">
-                    @foreach (var local in ViewBag.Locales)
-                    {
-                        <div class="col-md-6 mb-2">
-                            <div class="form-check">
-                                <input class="form-check-input"
-                                    type="checkbox"
-                                    name="LocalesSeleccionados"
-                                    value="@local.IdLocal"
-                                    id="local_@local.IdLocal" />
+        <!-- TÍTULO -->
+        <div class="tm-form-group">
 
-                                <label class="form-check-label" for="local_@local.IdLocal">
+            <label asp-for="Titulo" class="tm-form-label">
+                Título
+            </label>
+
+            <input asp-for="Titulo"
+                   class="form-control"
+                   placeholder="Ingresá el título de la publicación" />
+
+            <span asp-validation-for="Titulo"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- DESCRIPCIÓN -->
+        <div class="tm-form-group">
+
+            <label asp-for="Descripcion" class="tm-form-label">
+                Descripción
+            </label>
+
+            <textarea asp-for="Descripcion"
+                      class="form-control tm-publicacion-textarea"
+                      placeholder="Ingresá la descripción de la publicación">
+            </textarea>
+
+            <span asp-validation-for="Descripcion"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- TIPO -->
+        <div class="tm-form-group">
+
+            <label asp-for="Tipo" class="tm-form-label">
+                Tipo de publicación
+            </label>
+
+            <select asp-for="Tipo"
+                    class="form-select">
+
+                <option value="">
+                    Seleccione un tipo
+                </option>
+
+                <option value="Manual">
+                    Manual
+                </option>
+
+                <option value="Capacitacion">
+                    Capacitación
+                </option>
+
+                <option value="Novedad">
+                    Novedad
+                </option>
+
+                <option value="Comunicacion">
+                    Comunicación
+                </option>
+
+            </select>
+
+            <span asp-validation-for="Tipo"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- LOCALES DESTINATARIOS -->
+        <div class="tm-form-group">
+
+            <label class="tm-form-label">
+                Locales destinatarios
+            </label>
+
+            <p class="tm-form-help">
+                Seleccioná uno o varios locales que recibirán esta publicación.
+            </p>
+
+
+            <div class="tm-locales-dropdown">
+
+                <button type="button"
+                        class="tm-locales-dropdown-button"
+                        id="localesDropdownButton">
+
+                    <span id="localesDropdownText">
+                        Seleccionar locales
+                    </span>
+
+                    <span class="tm-locales-dropdown-arrow">
+                        ▾
+                    </span>
+
+                </button>
+
+
+                <div class="tm-locales-dropdown-menu"
+                     id="localesDropdownMenu">
+
+                    <!-- SELECCIONAR TODOS -->
+                    <div class="tm-locales-select-all">
+
+                        <label class="tm-local-checkbox">
+
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   id="seleccionarTodos" />
+
+                            <span>
+                                Seleccionar todos
+                            </span>
+
+                        </label>
+
+                    </div>
+
+
+                    <!-- LOCALES -->
+                    <div class="tm-locales-list">
+
+                        @foreach (var local in ViewBag.Locales)
+                        {
+                            <label class="tm-local-checkbox">
+
+                                <input class="form-check-input local-checkbox"
+                                       type="checkbox"
+                                       name="LocalesSeleccionados"
+                                       value="@local.IdLocal"
+                                       data-nombre="@local.Nombre"
+                                       id="local_@local.IdLocal" />
+
+                                <span>
                                     @local.Nombre
-                                </label>
-                            </div>
-                        </div>
-                    }
+                                </span>
+
+                            </label>
+                        }
+
+                    </div>
+
                 </div>
-            </div>
-            <div class="mb-3">
-                <label asp-for="ArchivoSubido" class="form-label">Archivo</label>
-                <input asp-for="ArchivoSubido" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.xls,.xlsx,.zip,.rar" />
-                <span asp-validation-for="ArchivoSubido" class="text-danger"></span>
+
             </div>
 
-            <button type="submit" class="btn btn-primary">
-                Guardar
-            </button>
+        </div>
 
-            <a asp-action="Index" class="btn btn-secondary">
-                Volver
+
+        <!-- ARCHIVO -->
+        <div class="tm-form-group">
+
+            <label asp-for="ArchivoSubido"
+                   class="tm-form-label">
+
+                Archivo adjunto
+
+            </label>
+
+            <p class="tm-form-help">
+                Podés adjuntar PDF, imágenes, Word, Excel, ZIP o RAR.
+            </p>
+
+            <input asp-for="ArchivoSubido"
+                   class="form-control"
+                   accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.xls,.xlsx,.zip,.rar" />
+
+            <span asp-validation-for="ArchivoSubido"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- BOTONES -->
+        <div class="tm-publicacion-form-actions">
+
+            <a asp-action="Index"
+               class="tm-btn-secondary">
+                Cancelar
             </a>
 
-        </form>
+            <button type="submit"
+                    class="tm-btn-primary">
+                Guardar publicación
+            </button>
 
-    </div>
+        </div>
+
+    </form>
+
 </div>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        const dropdownButton =
+            document.getElementById("localesDropdownButton");
+
+        const dropdownMenu =
+            document.getElementById("localesDropdownMenu");
+
+        const dropdownText =
+            document.getElementById("localesDropdownText");
+
+        const seleccionarTodos =
+            document.getElementById("seleccionarTodos");
+
+        const locales =
+            document.querySelectorAll(".local-checkbox");
+
+
+        /*
+         * Abrir / cerrar selector
+         */
+        dropdownButton.addEventListener("click", function () {
+
+            dropdownMenu.classList.toggle("show");
+
+        });
+
+
+        /*
+         * Cerrar si se hace clic afuera
+         */
+        document.addEventListener("click", function (event) {
+
+            if (!event.target.closest(".tm-locales-dropdown")) {
+
+                dropdownMenu.classList.remove("show");
+
+            }
+
+        });
+
+
+        /*
+         * Actualizar texto de la barra
+         */
+        function actualizarTextoLocales() {
+
+            const seleccionados =
+                document.querySelectorAll(".local-checkbox:checked");
+
+            const cantidad =
+                seleccionados.length;
+
+            const total =
+                document.querySelectorAll(".local-checkbox").length;
+
+
+            if (cantidad === 0) {
+
+                dropdownText.textContent =
+                    "Seleccionar locales";
+
+            }
+            else if (cantidad === total) {
+
+                dropdownText.textContent =
+                    "Todos los locales seleccionados";
+
+            }
+            else if (cantidad === 1) {
+
+                dropdownText.textContent =
+                    "1 local seleccionado";
+
+            }
+            else {
+
+                dropdownText.textContent =
+                    cantidad + " locales seleccionados";
+
+            }
+
+
+            seleccionarTodos.checked =
+                cantidad === total && total > 0;
+
+            seleccionarTodos.indeterminate =
+                cantidad > 0 && cantidad < total;
+
+        }
+
+
+        /*
+         * Seleccionar todos
+         */
+        seleccionarTodos.addEventListener("change", function () {
+
+            document.querySelectorAll(".local-checkbox")
+                .forEach(function (checkbox) {
+
+                    checkbox.checked =
+                        seleccionarTodos.checked;
+
+                });
+
+            actualizarTextoLocales();
+
+        });
+
+
+        /*
+         * Detectar cambios individuales
+         */
+        document.querySelectorAll(".local-checkbox")
+            .forEach(function (checkbox) {
+
+                checkbox.addEventListener("change", function () {
+
+                    actualizarTextoLocales();
+
+                });
+
+            });
+
+
+        /*
+         * Estado inicial
+         */
+        actualizarTextoLocales();
+
+    </script>
+}

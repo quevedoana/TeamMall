@@ -4,61 +4,153 @@
     ViewData["Title"] = "Nueva inasistencia";
 }
 
-<h1>Nueva inasistencia</h1>
+<div class="tm-page-header">
 
-<hr />
+    <div>
+        <h1 class="tm-page-title">
+            Nueva inasistencia
+        </h1>
 
-<div class="row">
-    <div class="col-md-6">
+        <p class="tm-page-description">
+            Cargá un certificado médico o una justificación.
+        </p>
+    </div>
 
-        <form asp-action="Create" method="post" enctype="multipart/form-data">
+</div>
 
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <div class="mb-3">
-                <label asp-for="Tipo" class="form-label"></label>
+<div class="tm-card tm-inasistencia-form-card">
 
-                <select asp-for="Tipo" class="form-select">
-                    <option value="">Seleccione un tipo</option>
-                    <option value="Certificado médico">Certificado médico</option>
-                    <option value="Justificación">Justificación</option>
-                </select>
+    <form asp-action="Create"
+          method="post"
+          enctype="multipart/form-data">
 
-                <span asp-validation-for="Tipo" class="text-danger"></span>
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
+
+
+        <!-- TIPO -->
+
+        <div class="tm-form-group">
+
+            <label asp-for="Tipo"
+                   class="tm-form-label">
+                Tipo de inasistencia
+            </label>
+
+            <select asp-for="Tipo"
+                    class="form-select">
+
+                <option value="">
+                    Seleccione un tipo
+                </option>
+
+                <option value="Certificado médico">
+                    Certificado médico
+                </option>
+
+                <option value="Justificación">
+                    Justificación
+                </option>
+
+            </select>
+
+            <span asp-validation-for="Tipo"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- FECHA -->
+
+        <div class="tm-form-group">
+
+            <label asp-for="FechaAusencia"
+                   class="tm-form-label">
+                Fecha de ausencia
+            </label>
+
+            <input asp-for="FechaAusencia"
+                   type="date"
+                   class="form-control" />
+
+            <span asp-validation-for="FechaAusencia"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- COMENTARIO -->
+
+        <div class="tm-form-group">
+
+            <label asp-for="Comentario"
+                   class="tm-form-label">
+                Comentario
+            </label>
+
+            <textarea asp-for="Comentario"
+                      class="form-control"
+                      rows="4"
+                      placeholder="Podés agregar información adicional...">
+            </textarea>
+
+            <span asp-validation-for="Comentario"
+                  class="text-danger">
+            </span>
+
+        </div>
+
+
+        <!-- ARCHIVO -->
+
+        <div class="tm-form-group">
+
+            <label class="tm-form-label">
+                Archivo
+            </label>
+
+            <input type="file"
+                   name="ArchivoSubido"
+                   class="form-control"
+                   accept=".pdf,.jpg,.jpeg,.png,.gif,.webp" />
+
+            <div class="tm-form-help">
+                Solo se permiten archivos PDF e imágenes
+                (JPG, JPEG, PNG, GIF o WEBP).
             </div>
 
-            <div class="mb-3">
-                <label asp-for="FechaAusencia" class="form-label"></label>
-                <input asp-for="FechaAusencia" type="date" class="form-control" />
-                <span asp-validation-for="FechaAusencia" class="text-danger"></span>
-            </div>
+            <span class="text-danger">
+                @Html.ValidationMessage("ArchivoSubido")
+            </span>
 
-            <div class="mb-3">
-                <label asp-for="Comentario" class="form-label"></label>
-                <textarea asp-for="Comentario"
-                          class="form-control"
-                          rows="4"></textarea>
-                <span asp-validation-for="Comentario" class="text-danger"></span>
-            </div>
+        </div>
 
-            <div class="mb-3">
-                <label class="form-label">Archivo</label>
-                <input type="file"
-                       name="ArchivoSubido"
-                       class="form-control" />
-            </div>
 
-            <button type="submit" class="btn btn-primary">
-                Guardar
+        <!-- ACCIONES -->
+
+        <div class="tm-publicacion-form-actions">
+
+            <button type="submit"
+                    class="tm-btn-primary">
+                Guardar inasistencia
             </button>
 
-            <a asp-controller="Home"
-               asp-action="Index"
-               class="btn btn-secondary">
-                Volver
+            <a asp-action="Index"
+               class="tm-btn-secondary">
+                Cancelar
             </a>
 
-        </form>
+        </div>
 
-    </div>
+    </form>
+
 </div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

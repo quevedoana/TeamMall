@@ -4,42 +4,121 @@
     ViewData["Title"] = "Publicación";
 }
 
-<div class="container mt-4">
+<div class="tm-page-header">
 
-    <h2>@Model.Titulo</h2>
+    <div>
+        <h1 class="tm-page-title">
+            @Model.Titulo
+        </h1>
 
-    <div class="card mt-3">
-        <div class="card-body">
-
-            <p class="text-muted">
-                @Model.Tipo
-            </p>
-
-            <p>
-                @Model.Descripcion
-            </p>
-
-            <p class="text-muted">
-                Publicado el:
-                @Model.FechaPublicacion.ToString("dd/MM/yyyy HH:mm")
-            </p>
-
-            @if (!string.IsNullOrEmpty(Model.Archivo))
-            {
-                <a href="@Model.Archivo"
-                   target="_blank"
-                   class="btn btn-primary">
-                    Descargar archivo
-                </a>
-            }
-
-        </div>
+        <p class="tm-page-description">
+            Detalle de la publicación recibida.
+        </p>
     </div>
 
-    <div class="mt-3">
-        <a asp-action="Index" class="btn btn-secondary">
+</div>
+
+
+<div class="tm-card tm-notificacion-publicacion-card">
+
+    <!-- ENCABEZADO -->
+
+    <div class="tm-notificacion-publicacion-header">
+
+        <div>
+            <span class="tm-notificacion-publicacion-tipo">
+                @Model.Tipo
+            </span>
+
+            <h2>
+                @Model.Titulo
+            </h2>
+        </div>
+
+    </div>
+
+
+    <!-- CONTENIDO -->
+
+    <div class="tm-notificacion-publicacion-contenido">
+
+        <div class="tm-notificacion-publicacion-descripcion">
+            @Model.Descripcion
+        </div>
+
+
+        <div class="tm-notificacion-publicacion-fecha">
+
+            <span class="tm-notificacion-publicacion-fecha-label">
+                Publicado el
+            </span>
+
+            <span>
+                @Model.FechaPublicacion.ToString("dd/MM/yyyy HH:mm")
+            </span>
+
+        </div>
+
+
+        @if (!string.IsNullOrEmpty(Model.Archivo))
+        {
+            string extension = System.IO.Path
+                .GetExtension(Model.Archivo)
+                .ToLowerInvariant();
+
+            if (extension == ".jpg" ||
+                extension == ".jpeg" ||
+                extension == ".png" ||
+                extension == ".gif" ||
+                extension == ".webp")
+            {
+                <div class="tm-notificacion-publicacion-imagen">
+                    <img src="@Model.Archivo"
+                         alt="@Model.Titulo" />
+                </div>
+            }
+            else
+            {
+                <div class="tm-notificacion-publicacion-archivo">
+
+                    <div class="tm-notificacion-publicacion-archivo-icono">
+                        📎
+                    </div>
+
+                    <div class="tm-notificacion-publicacion-archivo-info">
+
+                        <strong>
+                            Archivo adjunto
+                        </strong>
+
+                        <span>
+                            Podés abrir el archivo asociado a esta publicación.
+                        </span>
+
+                    </div>
+
+                    <a href="@Model.Archivo"
+                       target="_blank"
+                       class="tm-btn-notificacion">
+                        Ver archivo
+                    </a>
+
+                </div>
+            }
+        }
+
+    </div>
+
+
+    <!-- ACCIONES -->
+
+    <div class="tm-notificacion-publicacion-footer">
+
+        <a asp-action="Index"
+           class="tm-btn-secondary">
             Volver a notificaciones
         </a>
+
     </div>
 
 </div>

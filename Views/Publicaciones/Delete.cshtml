@@ -1,0 +1,125 @@
+@model TeaMall.Models.Publicacion
+
+@{
+    ViewData["Title"] = "Eliminar publicación";
+}
+
+<div class="tm-page-header">
+    <div>
+        <h1 class="tm-page-title">Eliminar publicación</h1>
+
+        <p class="tm-page-description">
+            Confirmá si querés eliminar esta publicación.
+        </p>
+    </div>
+
+    <a asp-action="Index"
+       class="tm-btn-secondary">
+        Volver
+    </a>
+</div>
+
+
+<div class="tm-card tm-publicacion-delete-card">
+
+    <div class="tm-publicacion-delete-alert">
+
+        <div class="tm-publicacion-delete-icon">
+            !
+        </div>
+
+        <div>
+            <h4>
+                ¿Eliminar esta publicación?
+            </h4>
+
+            <p>
+                Esta acción eliminará la publicación de TeamMall.
+                No podrás recuperar los datos una vez confirmada.
+            </p>
+        </div>
+
+    </div>
+
+
+    <!-- DATOS DE LA PUBLICACIÓN -->
+
+    <div class="tm-publicacion-delete-info">
+
+        <div class="tm-publicacion-delete-row">
+
+            <span class="tm-publicacion-delete-label">
+                Título
+            </span>
+
+            <span class="tm-publicacion-delete-value">
+                @Model.Titulo
+            </span>
+
+        </div>
+
+
+        <div class="tm-publicacion-delete-row">
+
+            <span class="tm-publicacion-delete-label">
+                Tipo
+            </span>
+
+            <span class="tm-publicacion-tipo">
+                @Model.Tipo
+            </span>
+
+        </div>
+
+
+        <div class="tm-publicacion-delete-row">
+
+            <span class="tm-publicacion-delete-label">
+                Fecha de publicación
+            </span>
+
+            <span class="tm-publicacion-delete-value">
+                @Model.FechaPublicacion.ToString("dd/MM/yyyy HH:mm")
+            </span>
+
+        </div>
+
+
+        <div class="tm-publicacion-delete-row tm-publicacion-delete-description">
+
+            <span class="tm-publicacion-delete-label">
+                Descripción
+            </span>
+
+            <span class="tm-publicacion-delete-value">
+                @Model.Descripcion
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- BOTONES -->
+
+    <form asp-action="Delete"
+          asp-route-id="@Model.IdPublicacion"
+          method="post">
+
+        <div class="tm-publicacion-delete-actions">
+
+            <a asp-action="Index"
+               class="tm-btn-secondary">
+                Cancelar
+            </a>
+
+            <button type="submit"
+                    class="tm-btn-publicacion-delete-confirm">
+                Eliminar publicación
+            </button>
+
+        </div>
+
+    </form>
+
+</div>

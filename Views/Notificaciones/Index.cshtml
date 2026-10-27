@@ -4,65 +4,109 @@
     ViewData["Title"] = "Notificaciones";
 }
 
-<div class="container mt-4">
+<div class="tm-page-header">
 
-    <h2>Notificaciones</h2>
+    <div>
+        <h1 class="tm-page-title">
+            Notificaciones
+        </h1>
+
+        <p class="tm-page-description">
+            Comunicaciones y publicaciones dirigidas a tu local.
+        </p>
+    </div>
+
+</div>
+
+
+<div class="tm-card tm-notificaciones-card">
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info mt-3">
-            No tenés notificaciones nuevas.
+        <div class="tm-notificaciones-vacio">
+
+            <div class="tm-notificaciones-vacio-icono">
+                ✓
+            </div>
+
+            <h5>
+                No tenés notificaciones nuevas
+            </h5>
+
+            <p>
+                Cuando recibas una nueva publicación, aparecerá acá.
+            </p>
+
         </div>
     }
     else
     {
-        <div class="list-group mt-3">
+        <div class="tm-notificaciones-lista">
 
             @foreach (var item in Model)
             {
                 var notificacion = item.Notificacion;
                 var publicacion = item.Publicacion;
 
-                <div class="list-group-item">
+                <div class="tm-notificacion-item @(notificacion.Leida ? "" : "tm-notificacion-no-leida")">
 
-                    <div class="d-flex justify-content-between align-items-center">
+                    <!-- INFORMACIÓN -->
+                    <div class="tm-notificacion-contenido">
 
-                        <div>
-                            <strong>@publicacion.Titulo</strong>
+                        <div class="tm-notificacion-titulo-row">
 
-                            <div class="text-muted">
-                                @publicacion.Descripcion
-                            </div>
-
-                            <small class="text-muted">
-                                @notificacion.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
-                            </small>
-                        </div>
-
-                        <div class="text-end">
+                            <h5>
+                                @publicacion.Titulo
+                            </h5>
 
                             @if (notificacion.Leida)
                             {
-                                <span class="badge bg-secondary">
+                                <span class="tm-notificacion-badge tm-notificacion-leida">
                                     Leída
                                 </span>
                             }
                             else
                             {
-                                <span class="badge bg-primary">
+                                <span class="tm-notificacion-badge tm-notificacion-nueva">
                                     Nueva
                                 </span>
                             }
 
-                            <div class="mt-2">
-                                <a asp-action="VerPublicacion"
-                                asp-route-id="@publicacion.IdPublicacion"
-                                class="btn btn-sm btn-primary">
-                                    Ver publicación
-                                </a>
-                            </div>
+                        </div>
+
+
+                        <p class="tm-notificacion-descripcion">
+                            @publicacion.Descripcion
+                        </p>
+
+
+                        <div class="tm-notificacion-meta">
+
+                            <span>
+                                @publicacion.Tipo
+                            </span>
+
+                            <span class="tm-notificacion-separador">
+                                •
+                            </span>
+
+                            <span>
+                                @notificacion.FechaCreacion.ToString("dd/MM/yyyy HH:mm")
+                            </span>
 
                         </div>
+
+                    </div>
+
+
+                    <!-- ACCIÓN -->
+                    <div class="tm-notificacion-accion">
+
+                        <a asp-action="VerPublicacion"
+                           asp-route-id="@publicacion.IdPublicacion"
+                           class="tm-btn-notificacion">
+                            Ver publicación
+                        </a>
 
                     </div>
 

@@ -4,17 +4,18 @@
     ViewData["Title"] = "Publicaciones";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="tm-page-header">
     <div>
-        <h1 class="mb-1">Publicaciones</h1>
-        <p class="text-muted mb-0">
-            Gestión de publicaciones y comunicados
+        <h1 class="tm-page-title">Publicaciones</h1>
+
+        <p class="tm-page-description">
+            Gestión de publicaciones y comunicados.
         </p>
     </div>
 
     @if (User.IsInRole("Administrador"))
     {
-        <a asp-action="Create" class="btn btn-primary">
+        <a asp-action="Create" class="tm-btn-primary">
             + Nueva publicación
         </a>
     }
@@ -23,8 +24,18 @@
 
 @if (!Model.Any())
 {
-    <div class="alert alert-info">
-        No hay publicaciones cargadas.
+    <div class="tm-card">
+        <div class="text-center py-4">
+
+            <h5 class="mb-2">
+                No hay publicaciones cargadas
+            </h5>
+
+            <p class="text-muted mb-0">
+                Todavía no se han registrado publicaciones en TeamMall.
+            </p>
+
+        </div>
     </div>
 }
 else
@@ -33,89 +44,123 @@ else
 
         @foreach (var publicacion in Model)
         {
-            <div class="col-md-6 col-lg-4">
+            <div class="col-md-6 col-xl-4">
 
-                <div class="card h-100 shadow-sm border-0">
+                <div class="tm-card tm-publicacion-card h-100 d-flex flex-column">
 
-                    <div class="card-body">
+                    <!-- ENCABEZADO -->
+                    <div class="tm-publicacion-header">
 
-                        <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="tm-publicacion-info">
 
-                            <h4 class="card-title mb-0">
+                            <h5 class="tm-publicacion-titulo">
                                 @publicacion.Titulo
-                            </h4>
+                            </h5>
 
-                            <span class="badge bg-primary">
-                                @publicacion.Tipo
-                            </span>
+                            <p class="tm-publicacion-fecha">
+                                Publicado el
+                                @publicacion.FechaPublicacion.ToString("dd/MM/yyyy HH:mm")
+                            </p>
 
                         </div>
 
-                        <p class="text-muted small mb-3">
-                            Publicado el
-                            @publicacion.FechaPublicacion.ToString("dd/MM/yyyy HH:mm")
-                        </p>
-
-                        <p class="card-text">
-                            @publicacion.Descripcion
-                        </p>
-
-                        @if (!string.IsNullOrEmpty(publicacion.Archivo))
-                        {
-                            string extension = System.IO.Path.GetExtension(publicacion.Archivo).ToLowerInvariant();
-
-                            if (extension == ".jpg" ||
-                                extension == ".jpeg" ||
-                                extension == ".png" ||
-                                extension == ".gif" ||
-                                extension == ".webp")
-                            {
-                                <div class="mb-3 text-center">
-                                    <img src="@publicacion.Archivo"
-                                        alt="@publicacion.Titulo"
-                                        class="img-fluid rounded"
-                                        style="max-height: 250px; object-fit: contain;" />
-                                </div>
-                            }
-                            else
-                            {
-                                <a href="@publicacion.Archivo"
-                                target="_blank"
-                                class="btn btn-outline-primary btn-sm">
-                                    📎 Ver archivo
-                                </a>
-                            }
-                        }
-                        else
-                        {
-                            <span class="text-muted small">
-                                Sin archivo adjunto
-                            </span>
-                        }
+                        <span class="tm-publicacion-tipo">
+                            @publicacion.Tipo
+                        </span>
 
                     </div>
 
+
+                    <!-- DESCRIPCIÓN -->
+                    <div class="tm-publicacion-descripcion">
+
+                        <p>
+                            @publicacion.Descripcion
+                        </p>
+
+                    </div>
+
+
+                    <!-- ARCHIVO -->
+                    @if (!string.IsNullOrEmpty(publicacion.Archivo))
+                    {
+                        string extension =
+                            System.IO.Path
+                                .GetExtension(publicacion.Archivo)
+                                .ToLowerInvariant();
+
+                        if (extension == ".jpg" ||
+                            extension == ".jpeg" ||
+                            extension == ".png" ||
+                            extension == ".gif" ||
+                            extension == ".webp")
+                        {
+                            <div class="tm-publicacion-imagen">
+
+                                <img src="@publicacion.Archivo"
+                                     alt="@publicacion.Titulo" />
+
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="tm-publicacion-archivo-container">
+
+                                <a href="@publicacion.Archivo"
+                                   target="_blank"
+                                   class="tm-publicacion-archivo">
+
+                                    <span class="tm-publicacion-archivo-icono">
+                                        📎
+                                    </span>
+
+                                    <span>
+                                        Ver archivo adjunto
+                                    </span>
+
+                                </a>
+
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="tm-publicacion-sin-archivo">
+
+                            <span>
+                                Sin archivo adjunto
+                            </span>
+
+                        </div>
+                    }
+
+
+                    <!-- ACCIONES ADMIN -->
                     @if (User.IsInRole("Administrador"))
                     {
-                        <div class="card-footer bg-white border-0 d-flex justify-content-end gap-2">
+                        <div class="tm-publicacion-footer">
 
-                            <a asp-action="Edit"
-                               asp-route-id="@publicacion.IdPublicacion"
-                               class="btn btn-warning btn-sm">
-                                Editar
-                            </a>
+                            <div class="tm-publicacion-acciones">
 
-                            <a asp-action="Delete"
-                               asp-route-id="@publicacion.IdPublicacion"
-                               class="btn btn-danger btn-sm">
-                                Eliminar
-                            </a>
+                                <a asp-action="Edit"
+                                   asp-route-id="@publicacion.IdPublicacion"
+                                   class="tm-btn-publicacion-edit">
+                                    Editar
+                                </a>
 
-                            <a asp-action="Accesos"
-                               asp-route-id="@publicacion.IdPublicacion"
-                               class="btn btn-info btn-sm">
-                                Ver accesos
-                            </a>
+                                <a asp-action="Delete"
+                                   asp-route-id="@publicacion.IdPublicacion"
+                                   class="tm-btn-publicacion-delete">
+                                    Eliminar
+                                </a>
+
+                                <a asp-action="Accesos"
+                                   asp-route-id="@publicacion.IdPublicacion"
+                                   class="tm-btn-publicacion-access">
+                                    Ver accesos
+                                </a>
+
+                            </div>
 
                         </div>
                     }
@@ -127,54 +172,62 @@ else
 
     </div>
 
+
+    <!-- PAGINACIÓN -->
     @if (ViewBag.TotalPaginas > 1)
     {
-        <div class="d-flex justify-content-between align-items-center mt-4 p-3 border-top">
+        <div class="tm-card tm-publicacion-paginacion">
 
-            <div class="text-muted small">
-                Página @ViewBag.PaginaActual de @ViewBag.TotalPaginas
-            </div>
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 
-            <nav aria-label="Paginación de publicaciones">
+                <div class="text-muted small">
+                    Página @ViewBag.PaginaActual de @ViewBag.TotalPaginas
+                </div>
 
-                <ul class="pagination mb-0">
+                <nav aria-label="Paginación de publicaciones">
 
-                    <li class="page-item @(ViewBag.PaginaActual == 1 ? "disabled" : "")">
+                    <ul class="pagination mb-0">
 
-                        <a class="page-link"
-                           asp-action="Index"
-                           asp-route-pagina="@(ViewBag.PaginaActual - 1)">
-                            Anterior
-                        </a>
-
-                    </li>
-
-                    @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
-                    {
-                        <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
+                        <li class="page-item @(ViewBag.PaginaActual == 1 ? "disabled" : "")">
 
                             <a class="page-link"
                                asp-action="Index"
-                               asp-route-pagina="@i">
-                                @i
+                               asp-route-pagina="@(ViewBag.PaginaActual - 1)">
+                                Anterior
                             </a>
 
                         </li>
-                    }
 
-                    <li class="page-item @(ViewBag.PaginaActual == ViewBag.TotalPaginas ? "disabled" : "")">
 
-                        <a class="page-link"
-                           asp-action="Index"
-                           asp-route-pagina="@(ViewBag.PaginaActual + 1)">
-                            Siguiente
-                        </a>
+                        @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+                        {
+                            <li class="page-item @(i == ViewBag.PaginaActual ? "active" : "")">
 
-                    </li>
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-route-pagina="@i">
+                                    @i
+                                </a>
 
-                </ul>
+                            </li>
+                        }
 
-            </nav>
+
+                        <li class="page-item @(ViewBag.PaginaActual == ViewBag.TotalPaginas ? "disabled" : "")">
+
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-pagina="@(ViewBag.PaginaActual + 1)">
+                                Siguiente
+                            </a>
+
+                        </li>
+
+                    </ul>
+
+                </nav>
+
+            </div>
 
         </div>
     }
