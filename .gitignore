@@ -261,3 +261,6 @@ paket-files/
 __pycache__/
 *.pyc
 .vscode/*
+
+# Credenciales privadas de Google Drive
+Credenciales/*

@@ -1,6 +1,8 @@
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using TeaMall.Data;
+using TeaMall.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +27,9 @@ builder.Services
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
     });
+
+// Servicio de Google Drive para consultar la última modificación
+builder.Services.AddSingleton<GoogleDriveService>();
 
 // Servicios MVC
 builder.Services.AddControllersWithViews();
