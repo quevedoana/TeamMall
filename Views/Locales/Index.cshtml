@@ -16,8 +16,7 @@
             </p>
         </div>
 
-        <a href="@Url.Action("Create", "Locales")"
-           class="btn tm-btn-primary">
+        <a href="@Url.Action("Create", "Locales")" class="btn tm-btn-primary">
             <span class="me-2">+</span> Nuevo local
         </a>
     </div>
@@ -95,11 +94,13 @@
             <div class="mb-3" style="font-size: 2.5rem;">🏬</div>
 
             <h5>
-                {{ busqueda ? 'No se encontraron locales' : 'Todavía no hay locales' }}
+                {{ busqueda.trim().length >= 3
+                    ? 'No se encontraron locales'
+                    : 'Todavía no hay locales' }}
             </h5>
 
             <p class="text-muted">
-                {{ busqueda
+                {{ busqueda.trim().length >= 3
                     ? 'Probá con otro nombre.'
                     : 'Creá el primer local para comenzar.' }}
             </p>
@@ -176,6 +177,7 @@
 
                 <nav aria-label="Paginación de locales"
                      class="d-flex align-items-center gap-2">
+
                     <button type="button"
                             class="btn btn-sm btn-outline-secondary"
                             v-bind:disabled="paginaActual <= 1 || cargando"
@@ -243,6 +245,13 @@
                 busqueda() {
                     clearTimeout(this.temporizadorBusqueda);
 
+                    const termino = this.busqueda.trim();
+
+                    // Con 1 o 2 caracteres, conservar el listado actual.
+                    if (termino.length > 0 && termino.length < 3) {
+                        return;
+                    }
+
                     this.temporizadorBusqueda = setTimeout(() => {
                         this.cargarLocales(1);
                     }, 300);
@@ -251,6 +260,13 @@
 
             methods: {
                 async cargarLocales(pagina = this.paginaActual) {
+                    const termino = this.busqueda.trim();
+
+                    // No buscar todavía si hay menos de 3 caracteres.
+                    if (termino.length > 0 && termino.length < 3) {
+                        return;
+                    }
+
                     this.cargando = true;
                     this.error = '';
 
@@ -258,11 +274,12 @@
                         const parametros = new URLSearchParams({
                             pagina: pagina,
                             tamaño: this.tamaño,
-                            busqueda: this.busqueda.trim()
+                            busqueda: termino
                         });
 
                         const respuesta = await fetch(
-                            '@Url.Action("Listar", "Locales")?' + parametros.toString()
+                            '@Url.Action("Listar", "Locales")?' +
+                            parametros.toString()
                         );
 
                         if (!respuesta.ok) {
@@ -274,10 +291,11 @@
 
                         const datos = await respuesta.json();
 
-                        this.locales = datos.locales;
-                        this.paginaActual = datos.pagina;
-                        this.total = datos.total;
-                        this.totalPaginas = datos.totalPaginas;
+                        this.locales = datos.locales ?? [];
+                        this.paginaActual = datos.pagina ?? 1;
+                        this.total = datos.total ?? 0;
+                        this.totalPaginas = datos.totalPaginas ?? 0;
+
                     } catch (error) {
                         console.error('Error al cargar locales:', error);
                         this.error = error.message ||
@@ -325,13 +343,7 @@
 
                         const resultado = await respuesta.json();
 
-                        const local = this.locales.find(
-                            l => l.idLocal === resultado.idLocal
-                        );
-
-                        if (local) {
-                            local.activo = false;
-                        }
+                        await this.cargarLocales(this.paginaActual);
 
                         alert(resultado.mensaje);
                     } catch (error) {

@@ -1,149 +1,373 @@
-@model IEnumerable<TeaMall.Models.Usuario>
 
 @{
     ViewData["Title"] = "Usuarios";
-    var locales = ViewBag.Locales as List<TeaMall.Models.Local>;
 }
 
-<div class="tm-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-    <div>
-        <h1 class="mb-1">Usuarios</h1>
-        <p class="text-muted mb-0">Administrá los usuarios y sus permisos en TeamMall.</p>
-    </div>
+<div id="appUsuarios">
+    <form id="formToken" class="d-none">
+        @Html.AntiForgeryToken()
+    </form>
 
-    <a asp-action="Create" class="btn tm-btn-primary">
-        <span class="me-2">+</span> Nuevo usuario
-    </a>
-</div>
-
-<div class="tm-card">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+    <div class="tm-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
-            <h5 class="mb-1">Listado de usuarios</h5>
-            <p class="text-muted small mb-0">Consultá los datos y el estado de cada usuario.</p>
+            <h1 class="mb-1">Usuarios</h1>
+            <p class="text-muted mb-0">
+                Administrá los usuarios y sus permisos en TeamMall.
+            </p>
         </div>
 
-        <span class="badge rounded-pill text-bg-light border">
-            Total: @(Model?.Count() ?? 0)
-        </span>
+        <a href="@Url.Action("Create", "Usuarios")" class="btn tm-btn-primary">
+            <span class="me-2">+</span> Nuevo usuario
+        </a>
     </div>
 
-    @if (Model == null || !Model.Any())
-    {
-        <div class="text-center py-5">
-            <div class="mb-3" style="font-size: 2.5rem;">👥</div>
-            <h5>Todavía no hay usuarios</h5>
-            <p class="text-muted">Creá el primer usuario para comenzar.</p>
+    <div class="tm-card">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+            <div>
+                <h5 class="mb-1">Listado de usuarios</h5>
+                <p class="text-muted small mb-0">
+                    Consultá los datos y el estado de cada usuario.
+                </p>
+            </div>
 
-            <a asp-action="Create" class="btn tm-btn-primary">
+            <div style="width: 100%; max-width: 360px;">
+                <label for="buscarUsuario" class="form-label small fw-semibold mb-2">
+                    Buscar usuarios
+                </label>
+
+                <input id="buscarUsuario"
+                       type="search"
+                       v-model="busqueda"
+                       class="form-control"
+                       placeholder="Nombre, apellido, DNI o email..."
+                       autocomplete="off" />
+
+                <div class="text-muted small mt-2">
+                    {{ total }}
+                    {{ total === 1 ? 'usuario encontrado' : 'usuarios encontrados' }}
+                </div>
+            </div>
+        </div>
+
+        <div v-if="cargando" class="text-center py-5">
+            Cargando usuarios...
+        </div>
+
+        <div v-else-if="error" class="alert alert-danger">
+            {{ error }}
+            <button type="button"
+                    class="btn btn-sm btn-outline-danger ms-2"
+                    v-on:click="cargarUsuarios()">
+                Reintentar
+            </button>
+        </div>
+
+        <div v-else-if="usuarios.length === 0" class="text-center py-5">
+            <div class="mb-3" style="font-size: 2.5rem;">👥</div>
+
+            <h5>
+                {{ busqueda.trim().length >= 3
+                    ? 'No se encontraron usuarios'
+                    : 'Todavía no hay usuarios' }}
+            </h5>
+
+            <p class="text-muted">
+                {{ busqueda.trim().length >= 3
+                    ? 'Probá con otro término de búsqueda.'
+                    : 'Creá el primer usuario para comenzar.' }}
+            </p>
+
+            <a v-if="!busqueda"
+               href="@Url.Action("Create", "Usuarios")"
+               class="btn tm-btn-primary">
                 Crear usuario
             </a>
         </div>
-    }
-    else
-    {
-        <div class="table-responsive">
-            <table class="table tm-table align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th>Usuario</th>
-                        <th>Email</th>
-                        <th>Local</th>
-                        <th>Rol</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
 
-                <tbody>
-                    @foreach (var usuario in Model)
-                    {
-                        var local = locales?.FirstOrDefault(
-                            l => l.IdLocal == usuario.IdLocal
-                        );
-
+        <div v-else>
+            <div class="table-responsive">
+                <table class="table tm-table align-middle mb-0">
+                    <thead>
                         <tr>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Local</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr v-for="usuario in usuarios" v-bind:key="usuario.idUsuario">
                             <td>
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="tm-user-initial">
-                                        @(
-                                            !string.IsNullOrWhiteSpace(usuario.Nombre)
-                                                ? usuario.Nombre.Substring(0, 1).ToUpper()
-                                                : "U"
-                                        )
+                                        {{ usuario.nombre
+                                            ? usuario.nombre.substring(0, 1).toUpperCase()
+                                            : 'U' }}
                                     </div>
 
                                     <div>
                                         <div class="fw-semibold">
-                                            @usuario.Nombre @usuario.Apellido
+                                            {{ usuario.nombre }} {{ usuario.apellido }}
                                         </div>
                                         <div class="text-muted small">
-                                            DNI: @usuario.DNI
+                                            DNI: {{ usuario.dni }}
                                         </div>
                                     </div>
                                 </div>
                             </td>
 
-                            <td>@usuario.Email</td>
+                            <td>{{ usuario.email }}</td>
 
                             <td>
-                                @(local?.Nombre ?? "Sin local asignado")
+                                {{ usuario.nombreLocal || 'Sin local asignado' }}
                             </td>
 
                             <td>
-                                @if (usuario.Rol == "Administrador")
-                                {
-                                    <span class="tm-role-admin">Administrador</span>
-                                }
-                                else
-                                {
-                                    <span class="tm-role-vendedor">@usuario.Rol</span>
-                                }
+                                <span v-if="usuario.rol === 'Administrador'"
+                                      class="tm-role-admin">
+                                    Administrador
+                                </span>
+
+                                <span v-else class="tm-role-vendedor">
+                                    {{ usuario.rol }}
+                                </span>
                             </td>
 
                             <td>
-                                @if (usuario.Activo)
-                                {
-                                    <span class="tm-badge-active">
-                                        <span class="tm-status-dot"></span>
-                                        Activo
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="tm-badge-inactive">
-                                        <span class="tm-status-dot"></span>
-                                        Inactivo
-                                    </span>
-                                }
+                                <span v-if="usuario.activo" class="tm-badge-active">
+                                    <span class="tm-status-dot"></span>
+                                    Activo
+                                </span>
+
+                                <span v-else class="tm-badge-inactive">
+                                    <span class="tm-status-dot"></span>
+                                    Inactivo
+                                </span>
                             </td>
 
                             <td>
                                 <div class="d-flex gap-2">
-                                    <a asp-action="Edit"
-                                       asp-route-id="@usuario.IdUsuario"
+                                    <a v-bind:href="'@Url.Action("Edit", "Usuarios")?id=' + usuario.idUsuario"
                                        class="btn btn-sm tm-btn-cancel tm-btn-editar">
                                         Editar
                                     </a>
 
-                                    <form asp-action="Desactivar"
-                                          asp-route-id="@usuario.IdUsuario"
-                                          method="post"
-                                          onsubmit="return confirm('¿Estás seguro de que querés @(usuario.Activo ? "desactivar" : "activar") a este usuario?');">
-
-                                        @Html.AntiForgeryToken()
-
-                                        <button type="submit"
-                                                class="btn btn-sm tm-btn-cancel @(usuario.Activo ? "tm-btn-desactivar" : "tm-btn-activar")">
-                                            @(usuario.Activo ? "Desactivar" : "Activar")
-                                        </button>
-                                    </form>
+                                    <button type="button"
+                                            v-bind:class="[
+                                                'btn',
+                                                'btn-sm',
+                                                'tm-btn-cancel',
+                                                usuario.activo ? 'tm-btn-desactivar' : 'tm-btn-activar'
+                                            ]"
+                                            v-on:click="cambiarEstado(usuario)">
+                                        {{ usuario.activo ? 'Desactivar' : 'Activar' }}
+                                    </button>
                                 </div>
                             </td>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mt-4">
+                <span class="text-muted small">
+                    Página {{ paginaActual }} de {{ totalPaginas }}
+                    · {{ total }} usuarios en total
+                </span>
+
+                <nav aria-label="Paginación de usuarios"
+                     class="d-flex align-items-center gap-2">
+
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            v-bind:disabled="paginaActual <= 1 || cargando"
+                            v-on:click="cargarUsuarios(paginaActual - 1)">
+                        Anterior
+                    </button>
+
+                    <button v-for="pagina in paginasVisibles"
+                            v-bind:key="pagina"
+                            type="button"
+                            class="btn btn-sm"
+                            v-bind:class="pagina === paginaActual
+                                ? 'tm-btn-primary'
+                                : 'btn-outline-secondary'"
+                            v-bind:disabled="cargando"
+                            v-on:click="cargarUsuarios(pagina)">
+                        {{ pagina }}
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary"
+                            v-bind:disabled="paginaActual >= totalPaginas || cargando"
+                            v-on:click="cargarUsuarios(paginaActual + 1)">
+                        Siguiente
+                    </button>
+                </nav>
+            </div>
         </div>
-    }
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    usuarios: [],
+                    cargando: true,
+                    error: '',
+                    busqueda: '',
+                    paginaActual: 1,
+                    tamaño: 5,
+                    total: 0,
+                    totalPaginas: 0,
+                    temporizadorBusqueda: null
+                };
+            },
+
+            computed: {
+                paginasVisibles() {
+                    const inicio = Math.max(1, this.paginaActual - 2);
+                    const fin = Math.min(this.totalPaginas, inicio + 4);
+                    const primerNumero = Math.max(1, fin - 4);
+
+                    return Array.from(
+                        { length: fin - primerNumero + 1 },
+                        (_, i) => primerNumero + i
+                    );
+                }
+            },
+
+            watch: {
+                busqueda() {
+                    clearTimeout(this.temporizadorBusqueda);
+
+                    const termino = this.busqueda.trim();
+
+                    // Con 1 o 2 caracteres, conservar la tabla actual.
+                    if (termino.length > 0 && termino.length < 3) {
+                        return;
+                    }
+
+                    this.temporizadorBusqueda = setTimeout(() => {
+                        this.cargarUsuarios(1);
+                    }, 300);
+                }
+            },
+
+            methods: {
+                async cargarUsuarios(pagina = this.paginaActual) {
+                    const termino = this.busqueda.trim();
+
+                    // No buscar todavía si hay menos de 3 caracteres.
+                    if (termino.length > 0 && termino.length < 3) {
+                        return;
+                    }
+
+                    this.cargando = true;
+                    this.error = '';
+
+                    try {
+                        const parametros = new URLSearchParams({
+                            pagina: pagina,
+                            tamaño: this.tamaño,
+                            busqueda: termino
+                        });
+
+                        const respuesta = await fetch(
+                            '@Url.Action("Listar", "Usuarios")?' +
+                            parametros.toString()
+                        );
+
+                        if (!respuesta.ok) {
+                            throw new Error(
+                                'No se pudieron obtener los usuarios. Código: ' +
+                                respuesta.status
+                            );
+                        }
+
+                        const datos = await respuesta.json();
+
+                        this.usuarios = datos.usuarios ?? [];
+                        this.paginaActual = datos.pagina ?? 1;
+                        this.total = datos.total ?? 0;
+                        this.totalPaginas = datos.totalPaginas ?? 0;
+
+                    } catch (error) {
+                        console.error('Error al cargar usuarios:', error);
+                        this.error = error.message ||
+                            'Ocurrió un error al cargar los usuarios.';
+                    } finally {
+                        this.cargando = false;
+                    }
+                },
+
+                async cambiarEstado(usuario) {
+                    const accion = usuario.activo ? 'desactivar' : 'activar';
+
+                    if (!confirm(
+                        `¿Estás segura de que querés ${accion} a ` +
+                        `${usuario.nombre} ${usuario.apellido}?`
+                    )) {
+                        return;
+                    }
+
+                    const tokenInput = document.querySelector(
+                        '#formToken input[name="__RequestVerificationToken"]'
+                    );
+
+                    if (!tokenInput) {
+                        alert(
+                            'No se encontró el token de seguridad. ' +
+                            'Recargá la página.'
+                        );
+                        return;
+                    }
+
+                    try {
+                        const url = '@Url.Action("Desactivar", "Usuarios")' +
+                            '?id=' + encodeURIComponent(usuario.idUsuario);
+
+                        const respuesta = await fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: new URLSearchParams({
+                                '__RequestVerificationToken': tokenInput.value
+                            })
+                        });
+
+                        if (!respuesta.ok) {
+                            throw new Error(
+                                'No se pudo cambiar el estado del usuario. Código: ' +
+                                respuesta.status
+                            );
+                        }
+
+                        await this.cargarUsuarios(this.paginaActual);
+
+                    } catch (error) {
+                        console.error('Error al cambiar estado:', error);
+                        alert(error.message ||
+                            'Ocurrió un error al cambiar el estado.');
+                    }
+                }
+            },
+
+            mounted() {
+                this.cargarUsuarios(1);
+            },
+
+            beforeUnmount() {
+                clearTimeout(this.temporizadorBusqueda);
+            }
+        }).mount('#appUsuarios');
+    </script>
+}
