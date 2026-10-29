@@ -1,9 +1,11 @@
+
 using System.Text;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TeaMall.Data;
+using TeaMall.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,6 +67,9 @@ builder.Services
         };
     });
 
+// Registrar Google Drive
+builder.Services.AddScoped<GoogleDriveService>();
+
 // Servicios MVC
 builder.Services.AddControllersWithViews();
 
@@ -74,7 +79,12 @@ builder.Services.AddAntiforgery(options =>
 });
 
 // Autorización
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 var app = builder.Build();
 

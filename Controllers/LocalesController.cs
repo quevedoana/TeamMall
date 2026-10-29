@@ -26,70 +26,95 @@ namespace TeaMall.Controllers
         }
 
         // GET: Locales/Listar
-        
-[HttpGet]
-public async Task<IActionResult> Listar(
-    int pagina = 1,
-    int tamaño = 5,
-    string busqueda = "")
-{
-    // Validar los parámetros de paginación.
-    pagina = Math.Max(1, pagina);
-    tamaño = Math.Clamp(tamaño, 1, 50);
-
-    // Consulta inicial sin cargar todos los registros.
-    var consulta = _context.Locales
-        .AsNoTracking()
-        .AsQueryable();
-
-    // Búsqueda por nombre del local.
-    if (!string.IsNullOrWhiteSpace(busqueda))
-    {
-        busqueda = busqueda.Trim();
-        consulta = consulta.Where(l =>
-            l.Nombre.Contains(busqueda));
-    }
-
-    // Contar los resultados después del filtro.
-    var total = await consulta.CountAsync();
-
-    var totalPaginas = (int)Math.Ceiling(
-        total / (double)tamaño);
-
-    // Si no hay resultados, la página actual será 1.
-    if (totalPaginas == 0)
-    {
-        pagina = 1;
-    }
-    else
-    {
-        pagina = Math.Min(pagina, totalPaginas);
-    }
-
-    // Obtener solamente los registros de la página solicitada.
-    var locales = await consulta
-        .OrderBy(l => l.Nombre)
-        .Skip((pagina - 1) * tamaño)
-        .Take(tamaño)
-        .Select(l => new
+        [HttpGet]
+        public async Task<IActionResult> Listar(
+            int pagina = 1,
+            int tamaño = 5,
+            string busqueda = "")
         {
-            idLocal = l.IdLocal,
-            nombre = l.Nombre,
-            activo = l.Activo
-        })
-        .ToListAsync();
+            // Validar los parámetros de paginación.
+            pagina = Math.Max(1, pagina);
+            tamaño = Math.Clamp(tamaño, 1, 50);
 
-    // Devolver el formato que espera Index.cshtml.
-    return Json(new
-    {
-        locales,
-        pagina,
-        tamaño,
-        total,
-        totalPaginas
-    });
-}
+            // Consulta inicial sin cargar todos los registros.
+            var consulta = _context.Locales
+                .AsNoTracking()
+                .AsQueryable();
 
+            // Búsqueda por nombre del local.
+            if (!string.IsNullOrWhiteSpace(busqueda))
+            {
+                busqueda = busqueda.Trim();
+                consulta = consulta.Where(l =>
+                    l.Nombre.Contains(busqueda));
+            }
+
+            // Contar los resultados después del filtro.
+            var total = await consulta.CountAsync();
+
+            var totalPaginas = (int)Math.Ceiling(
+                total / (double)tamaño);
+
+            // Si no hay resultados, la página actual será 1.
+            if (totalPaginas == 0)
+            {
+                pagina = 1;
+            }
+            else
+            {
+                pagina = Math.Min(pagina, totalPaginas);
+            }
+
+            // Obtener solamente los registros de la página solicitada.
+            var locales = await consulta
+                .OrderBy(l => l.Nombre)
+                .Skip((pagina - 1) * tamaño)
+                .Take(tamaño)
+                .Select(l => new
+                {
+                    idLocal = l.IdLocal,
+                    nombre = l.Nombre,
+                    activo = l.Activo
+                })
+                .ToListAsync();
+
+            // Devolver el formato que espera Index.cshtml.
+            return Json(new
+            {
+                locales,
+                pagina,
+                tamaño,
+                total,
+                totalPaginas
+            });
+        }
+
+        // GET: Locales/Buscar?q=car
+        // Devuelve hasta 10 locales activos para los buscadores.
+        [HttpGet]
+        public async Task<IActionResult> Buscar(string? q)
+        {
+            if (string.IsNullOrWhiteSpace(q))
+            {
+                return Json(new List<object>());
+            }
+
+            q = q.Trim();
+
+            var locales = await _context.Locales
+                .AsNoTracking()
+                .Where(l => l.Activo && l.Nombre.Contains(q))
+                .OrderBy(l => l.Nombre)
+                .Take(10)
+                .Select(l => new
+                {
+                    idLocal = l.IdLocal,
+                    nombre = l.Nombre
+                })
+                .ToListAsync();
+
+            return Json(locales);
+        }
 
         // GET: Locales/Create
         [HttpGet]
@@ -143,51 +168,51 @@ public async Task<IActionResult> Listar(
         }
 
         // POST: Locales/Edit/5
-        
-[HttpPost]
-[ValidateAntiForgeryToken]
-public async Task<IActionResult> Edit(int id, [FromBody] Local local)
-{
-    if (id != local.IdLocal)
-    {
-        return BadRequest(new
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(
+            int id,
+            [FromBody] Local local)
         {
-            mensaje = "El identificador del local no coincide."
-        });
-    }
+            if (id != local.IdLocal)
+            {
+                return BadRequest(new
+                {
+                    mensaje = "El identificador del local no coincide."
+                });
+            }
 
-    if (!ModelState.IsValid)
-    {
-        return BadRequest(new
-        {
-            mensaje = "Revisá los datos ingresados."
-        });
-    }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new
+                {
+                    mensaje = "Revisá los datos ingresados."
+                });
+            }
 
-    var localExistente = await _context.Locales.FindAsync(id);
+            var localExistente = await _context.Locales.FindAsync(id);
 
-    if (localExistente == null)
-    {
-        return NotFound(new
-        {
-            mensaje = "No se encontró el local."
-        });
-    }
+            if (localExistente == null)
+            {
+                return NotFound(new
+                {
+                    mensaje = "No se encontró el local."
+                });
+            }
 
-    localExistente.Nombre = local.Nombre;
-    localExistente.Activo = local.Activo;
+            localExistente.Nombre = local.Nombre;
+            localExistente.Activo = local.Activo;
 
-    await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
-    return Json(new
-    {
-        mensaje = "Local actualizado correctamente.",
-        idLocal = localExistente.IdLocal,
-        nombre = localExistente.Nombre,
-        activo = localExistente.Activo
-    });
-}
-
+            return Json(new
+            {
+                mensaje = "Local actualizado correctamente.",
+                idLocal = localExistente.IdLocal,
+                nombre = localExistente.Nombre,
+                activo = localExistente.Activo
+            });
+        }
 
         // POST: Locales/Desactivar/5
         [HttpPost]

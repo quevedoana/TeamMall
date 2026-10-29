@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication;
@@ -20,6 +21,7 @@ namespace TeaMall.Controllers
         }
 
         // GET: Login
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Index()
         {
@@ -27,6 +29,7 @@ namespace TeaMall.Controllers
         }
 
         // POST: Login
+        [AllowAnonymous]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(string dni, string contrasenia)
