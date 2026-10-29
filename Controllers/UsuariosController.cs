@@ -1,7 +1,6 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using TeaMall.Data;
@@ -24,7 +23,6 @@ namespace TeaMall.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            // La vista se carga una sola vez.
             // Los datos se obtienen mediante Listar() usando AJAX.
             return View();
         }
@@ -97,9 +95,8 @@ namespace TeaMall.Controllers
 
         // GET: Usuarios/Create
         [HttpGet]
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
-            await CargarLocales();
             return View(new Usuario { Activo = true });
         }
 
@@ -169,7 +166,6 @@ namespace TeaMall.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            await CargarLocales();
             return View(usuario);
         }
 
@@ -178,14 +174,19 @@ namespace TeaMall.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
+            {
                 return NotFound();
+            }
 
             var usuario = await _context.Usuarios.FindAsync(id);
 
             if (usuario == null)
+            {
                 return NotFound();
+            }
 
-            await CargarLocales();
+            await CargarNombreLocalActual(usuario.IdLocal);
+
             return View(usuario);
         }
 
@@ -195,12 +196,16 @@ namespace TeaMall.Controllers
         public async Task<IActionResult> Edit(int id, Usuario usuario)
         {
             if (id != usuario.IdUsuario)
+            {
                 return NotFound();
+            }
 
             var usuarioExistente = await _context.Usuarios.FindAsync(id);
 
             if (usuarioExistente == null)
+            {
                 return NotFound();
+            }
 
             ModelState.Remove(nameof(usuario.Contrasenia));
 
@@ -262,7 +267,8 @@ namespace TeaMall.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            await CargarLocales();
+            await CargarNombreLocalActual(usuario.IdLocal);
+
             return View(usuario);
         }
 
@@ -294,19 +300,20 @@ namespace TeaMall.Controllers
             });
         }
 
-        // Cargar locales activos en los selectores de Create y Edit
-        private async Task CargarLocales()
+        // Recuperar el nombre del local sin cargar todos los locales.
+        private async Task CargarNombreLocalActual(int? idLocal)
         {
-            var locales = await _context.Locales
-                .Where(l => l.Activo)
-                .OrderBy(l => l.Nombre)
-                .ToListAsync();
+            if (!idLocal.HasValue)
+            {
+                ViewBag.NombreLocalActual = "";
+                return;
+            }
 
-            ViewBag.Locales = new SelectList(
-                locales,
-                "IdLocal",
-                "Nombre"
-            );
+            ViewBag.NombreLocalActual = await _context.Locales
+                .AsNoTracking()
+                .Where(l => l.IdLocal == idLocal.Value)
+                .Select(l => l.Nombre)
+                .FirstOrDefaultAsync() ?? "";
         }
     }
 }

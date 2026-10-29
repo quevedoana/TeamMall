@@ -1,7 +1,9 @@
+
 @model TeaMall.Models.Usuario
 
 @{
     ViewData["Title"] = "Editar usuario";
+    var nombreLocalActual = ViewBag.NombreLocalActual as string ?? "";
 }
 
 <div class="tm-page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
@@ -65,11 +67,54 @@
             </div>
 
             <div class="col-md-6">
-                <label asp-for="IdLocal" class="form-label">Local asignado</label>
-                <select asp-for="IdLocal" asp-items="ViewBag.Locales" class="form-select">
-                    <option value="">Sin local asignado</option>
-                </select>
-                <span asp-validation-for="IdLocal" class="text-danger small"></span>
+                <label class="form-label" for="localesDropdownButton">Local asignado</label>
+
+                <input type="hidden" asp-for="IdLocal" id="IdLocal" />
+
+                <div class="tm-locales-dropdown" id="selectorLocal">
+                    <button type="button"
+                            class="form-select text-start"
+                            id="localesDropdownButton"
+                            aria-expanded="false"
+                            aria-controls="localesDropdownMenu">
+                        <span id="localesDropdownText">
+                            @(Model.IdLocal.HasValue && !string.IsNullOrWhiteSpace(nombreLocalActual)
+                                ? nombreLocalActual
+                                : "Seleccionar local")
+                        </span>
+                    </button>
+
+                    <div class="tm-locales-dropdown-menu"
+                         id="localesDropdownMenu"
+                         style="display: none;">
+                        <div class="p-2">
+                            <input type="search"
+                                   id="buscarLocal"
+                                   class="form-control"
+                                   placeholder="Buscar local..."
+                                   autocomplete="off" />
+                        </div>
+
+                        <div id="resultadosLocales" class="tm-locales-list">
+                            <div class="text-muted small p-2">
+                                Cargando locales...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button"
+                        class="btn btn-sm btn-outline-secondary mt-2"
+                        id="limpiarLocal">
+                    Quitar local
+                </button>
+
+                <span asp-validation-for="IdLocal" class="text-danger small d-block"></span>
+
+                <small class="text-muted d-block mt-1">
+                    Seleccioná un local de la lista o buscá por nombre.
+                    Podés dejarlo vacío si no corresponde asignar uno.
+                </small>
             </div>
 
             <div class="col-12">
@@ -85,12 +130,210 @@
         <hr class="my-4" />
 
         <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
-            <a asp-action="Index" class="btn tm-btn-cancel">
-                Cancelar
-            </a>
-            <button type="submit" class="btn tm-btn-primary">
-                Guardar cambios
-            </button>
+            <a asp-action="Index" class="btn tm-btn-cancel">Cancelar</a>
+            <button type="submit" class="btn tm-btn-primary">Guardar cambios</button>
         </div>
     </form>
 </div>
+
+@section Scripts {
+    <style>
+        .tm-locales-dropdown {
+            position: relative;
+            width: 100%;
+        }
+
+        #localesDropdownButton {
+            width: 100%;
+            min-height: 38px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .tm-locales-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            z-index: 1050;
+            background: var(--bs-body-bg, #fff);
+            color: var(--bs-body-color, #212529);
+            border: 1px solid var(--bs-border-color, #ced4da);
+            border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .12);
+        }
+
+        .tm-locales-dropdown-menu.abierto {
+            display: block;
+        }
+
+        .tm-locales-list {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .tm-local-opcion {
+            display: block;
+            width: 100%;
+            padding: 10px 12px;
+            border: 0;
+            border-top: 1px solid var(--bs-border-color, #eee);
+            background: transparent;
+            color: var(--bs-body-color, #212529);
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .tm-local-opcion:hover,
+        .tm-local-opcion:focus {
+            background: var(--bs-secondary-bg, #f1f1f1);
+        }
+    </style>
+
+    <script>
+        (() => {
+            const selector = document.getElementById("selectorLocal");
+            if (!selector) return;
+
+            const boton = document.getElementById("localesDropdownButton");
+            const menu = document.getElementById("localesDropdownMenu");
+            const textoSeleccionado = document.getElementById("localesDropdownText");
+            const buscador = document.getElementById("buscarLocal");
+            const resultados = document.getElementById("resultadosLocales");
+            const idLocal = document.getElementById("IdLocal");
+            const limpiar = document.getElementById("limpiarLocal");
+
+            let temporizador;
+            let numeroSolicitud = 0;
+
+            function mostrarMensaje(mensaje, clase = "text-muted") {
+                resultados.replaceChildren();
+
+                const elemento = document.createElement("div");
+                elemento.className = `small p-2 ${clase}`;
+                elemento.textContent = mensaje;
+
+                resultados.appendChild(elemento);
+            }
+
+            function cerrarMenu() {
+                menu.classList.remove("abierto");
+                menu.style.display = "none";
+                boton.setAttribute("aria-expanded", "false");
+            }
+
+            function abrirMenu() {
+                menu.classList.add("abierto");
+                menu.style.display = "block";
+                boton.setAttribute("aria-expanded", "true");
+
+                buscador.value = "";
+                cargarLocales("");
+                buscador.focus();
+            }
+
+            function seleccionarLocal(local) {
+                idLocal.value = local.idLocal;
+                textoSeleccionado.textContent = local.nombre;
+                buscador.value = "";
+                cerrarMenu();
+            }
+
+            async function cargarLocales(consulta) {
+                clearTimeout(temporizador);
+                const solicitud = ++numeroSolicitud;
+
+                mostrarMensaje("Cargando locales...");
+
+                try {
+                    const url = '@Url.Action("Buscar", "Locales")'
+                        + '?q=' + encodeURIComponent(consulta);
+
+                    const respuesta = await fetch(url);
+
+                    if (!respuesta.ok) {
+                        throw new Error("No se pudieron cargar los locales.");
+                    }
+
+                    const locales = await respuesta.json();
+
+                    if (solicitud !== numeroSolicitud) return;
+
+                    resultados.replaceChildren();
+
+                    if (locales.length === 0) {
+                        mostrarMensaje(
+                            consulta.length >= 2
+                                ? "No se encontraron locales activos."
+                                : "No hay locales activos."
+                        );
+                        return;
+                    }
+
+                    locales.forEach(local => {
+                        const opcion = document.createElement("button");
+                        opcion.type = "button";
+                        opcion.className = "tm-local-opcion";
+                        opcion.textContent = local.nombre;
+
+                        opcion.addEventListener("click", () => {
+                            seleccionarLocal(local);
+                        });
+
+                        resultados.appendChild(opcion);
+                    });
+                } catch {
+                    if (solicitud === numeroSolicitud) {
+                        mostrarMensaje(
+                            "Error al cargar los locales. Intentá nuevamente.",
+                            "text-danger"
+                        );
+                    }
+                }
+            }
+
+            boton.addEventListener("click", () => {
+                if (menu.classList.contains("abierto")) {
+                    cerrarMenu();
+                } else {
+                    abrirMenu();
+                }
+            });
+
+            buscador.addEventListener("input", () => {
+                const consulta = buscador.value.trim();
+                clearTimeout(temporizador);
+
+                if (consulta.length === 1) {
+                    numeroSolicitud++;
+                    mostrarMensaje("Escribí al menos 2 caracteres para buscar.");
+                    return;
+                }
+
+                temporizador = setTimeout(() => {
+                    cargarLocales(consulta);
+                }, 300);
+            });
+
+            limpiar.addEventListener("click", () => {
+                clearTimeout(temporizador);
+                numeroSolicitud++;
+
+                idLocal.value = "";
+                textoSeleccionado.textContent = "Seleccionar local";
+                buscador.value = "";
+
+                mostrarMensaje("Abrí el desplegable para ver los locales.");
+                cerrarMenu();
+            });
+
+            document.addEventListener("click", evento => {
+                if (!selector.contains(evento.target)) {
+                    cerrarMenu();
+                }
+            });
+        })();
+    </script>
+}

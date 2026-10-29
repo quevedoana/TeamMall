@@ -32,16 +32,13 @@ namespace TeaMall.Controllers
             int tamaño = 5,
             string busqueda = "")
         {
-            // Validar los parámetros de paginación.
             pagina = Math.Max(1, pagina);
             tamaño = Math.Clamp(tamaño, 1, 50);
 
-            // Consulta inicial sin cargar todos los registros.
             var consulta = _context.Locales
                 .AsNoTracking()
                 .AsQueryable();
 
-            // Búsqueda por nombre del local.
             if (!string.IsNullOrWhiteSpace(busqueda))
             {
                 busqueda = busqueda.Trim();
@@ -49,13 +46,11 @@ namespace TeaMall.Controllers
                     l.Nombre.Contains(busqueda));
             }
 
-            // Contar los resultados después del filtro.
             var total = await consulta.CountAsync();
 
             var totalPaginas = (int)Math.Ceiling(
                 total / (double)tamaño);
 
-            // Si no hay resultados, la página actual será 1.
             if (totalPaginas == 0)
             {
                 pagina = 1;
@@ -65,7 +60,6 @@ namespace TeaMall.Controllers
                 pagina = Math.Min(pagina, totalPaginas);
             }
 
-            // Obtener solamente los registros de la página solicitada.
             var locales = await consulta
                 .OrderBy(l => l.Nombre)
                 .Skip((pagina - 1) * tamaño)
@@ -78,7 +72,6 @@ namespace TeaMall.Controllers
                 })
                 .ToListAsync();
 
-            // Devolver el formato que espera Index.cshtml.
             return Json(new
             {
                 locales,
@@ -90,20 +83,29 @@ namespace TeaMall.Controllers
         }
 
         // GET: Locales/Buscar?q=car
-        // Devuelve hasta 10 locales activos para los buscadores.
+        // Muestra los primeros 10 locales activos si no hay búsqueda.
+        // Si se escribe un nombre, filtra los resultados.
         [HttpGet]
         public async Task<IActionResult> Buscar(string? q)
         {
-            if (string.IsNullOrWhiteSpace(q))
+            q = q?.Trim();
+
+            var consulta = _context.Locales
+                .AsNoTracking()
+                .Where(l => l.Activo);
+
+            if (!string.IsNullOrWhiteSpace(q))
             {
-                return Json(new List<object>());
+                if (q.Length < 2)
+                {
+                    return Json(Array.Empty<object>());
+                }
+
+                consulta = consulta.Where(l =>
+                    l.Nombre.Contains(q));
             }
 
-            q = q.Trim();
-
-            var locales = await _context.Locales
-                .AsNoTracking()
-                .Where(l => l.Activo && l.Nombre.Contains(q))
+            var locales = await consulta
                 .OrderBy(l => l.Nombre)
                 .Take(10)
                 .Select(l => new
