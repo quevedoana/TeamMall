@@ -2670,3 +2670,51 @@ body.tm-body {
 .tm-imagen-publicacion-ampliable:hover {
     opacity: 0.92;
 }
+
+/* ================
+   PAGINACIÓN DE NOTIFICACIONES
+   ================================ */
+
+.tm-notificaciones-card .tm-paginacion {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid var(--tm-border);
+}
+
+.tm-notificaciones-card .tm-paginacion-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 14px;
+    border: 1px solid var(--tm-border);
+    border-radius: 8px;
+    background: var(--tm-white);
+    color: var(--tm-text);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.tm-notificaciones-card .tm-paginacion-btn:hover {
+    background: var(--tm-green-light);
+    border-color: var(--tm-green);
+    color: var(--tm-green-dark);
+}
+
+.tm-notificaciones-card .tm-paginacion-btn.tm-paginacion-activa {
+    background: var(--tm-green-dark);
+    border-color: var(--tm-green-dark);
+    color: var(--tm-white);
+}
+
+.tm-notificaciones-card .tm-paginacion-btn.tm-paginacion-activa:hover {
+    background: var(--tm-green-dark);
+    color: var(--tm-white);
+}

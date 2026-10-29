@@ -15,7 +15,7 @@ namespace TeaMall.Controllers
         }
 
         // GET: Notificaciones
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pagina = 1)
         {
             var idUsuarioClaim = User.FindFirstValue(
                 ClaimTypes.NameIdentifier
@@ -31,8 +31,6 @@ namespace TeaMall.Controllers
                 .OrderByDescending(n => n.FechaCreacion)
                 .ToListAsync();
 
-            // Registramos el primer visto:
-            // el vendedor entró a la sección de notificaciones.
             var notificacionesNoLeidas = notificaciones
                 .Where(n => !n.Leida)
                 .ToList();
@@ -48,8 +46,29 @@ namespace TeaMall.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // Volvemos a cargar las publicaciones asociadas
-            // para mostrarlas en la vista.
+            var cantidadPorPagina = 10;
+
+            var totalNotificaciones = notificaciones.Count;
+
+            var totalPaginas = (int)Math.Ceiling(
+                totalNotificaciones / (double)cantidadPorPagina
+            );
+
+            if (totalPaginas == 0)
+            {
+                totalPaginas = 1;
+            }
+
+            if (pagina < 1)
+            {
+                pagina = 1;
+            }
+
+            if (pagina > totalPaginas)
+            {
+                pagina = totalPaginas;
+            }
+
             var resultado = await _context.Notificaciones
                 .Where(n => n.IdUsuario == idUsuario)
                 .Join(
@@ -63,7 +82,12 @@ namespace TeaMall.Controllers
                     }
                 )
                 .OrderByDescending(x => x.Notificacion.FechaCreacion)
+                .Skip((pagina - 1) * cantidadPorPagina)
+                .Take(cantidadPorPagina)
                 .ToListAsync();
+
+            ViewBag.PaginaActual = pagina;
+            ViewBag.TotalPaginas = totalPaginas;
 
             return View(resultado);
         }

@@ -114,6 +114,40 @@
             }
 
         </div>
+
+        @if (ViewBag.TotalPaginas > 1)
+        {
+            <div class="tm-paginacion">
+
+                @if (ViewBag.PaginaActual > 1)
+                {
+                    <a asp-action="Index"
+                    asp-route-pagina="@(ViewBag.PaginaActual - 1)"
+                    class="tm-paginacion-btn">
+                        Anterior
+                    </a>
+                }
+
+                @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+                {
+                    <a asp-action="Index"
+                    asp-route-pagina="@i"
+                    class="tm-paginacion-btn @(i == ViewBag.PaginaActual ? "tm-paginacion-activa" : "")">
+                        @i
+                    </a>
+                }
+
+                @if (ViewBag.PaginaActual < ViewBag.TotalPaginas)
+                {
+                    <a asp-action="Index"
+                    asp-route-pagina="@(ViewBag.PaginaActual + 1)"
+                    class="tm-paginacion-btn">
+                        Siguiente
+                    </a>
+                }
+
+            </div>
+        }
     }
 
 </div>

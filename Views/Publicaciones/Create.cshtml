@@ -138,6 +138,13 @@
                 <div class="tm-locales-dropdown-menu"
                      id="localesDropdownMenu">
 
+                     <div class="tm-locales-buscador">
+                        <input type="text"
+                            id="buscarLocal"
+                            class="form-control"
+                            placeholder="Buscar local..." />
+                    </div>
+
                     <!-- SELECCIONAR TODOS -->
                     <div class="tm-locales-select-all">
 
@@ -251,6 +258,9 @@
 
         const locales =
             document.querySelectorAll(".local-checkbox");
+        
+        const buscarLocal =
+            document.getElementById("buscarLocal");
 
 
         /*
@@ -259,6 +269,10 @@
         dropdownButton.addEventListener("click", function () {
 
             dropdownMenu.classList.toggle("show");
+
+            if (dropdownMenu.classList.contains("show")) {
+                buscarLocal.focus();
+            }
 
         });
 
@@ -326,6 +340,34 @@
 
         }
 
+        buscarLocal.addEventListener("input", function () {
+
+            const texto =
+                buscarLocal.value.toLowerCase().trim();
+
+            document.querySelectorAll(".tm-local-checkbox")
+                .forEach(function (label) {
+
+                    const checkbox =
+                        label.querySelector(".local-checkbox");
+
+                    if (!checkbox) {
+                        return;
+                    }
+
+                    const nombre =
+                        checkbox.dataset.nombre.toLowerCase();
+
+                    if (nombre.includes(texto)) {
+                        label.style.display = "flex";
+                    }
+                    else {
+                        label.style.display = "none";
+                    }
+
+                });
+
+        });
 
         /*
          * Seleccionar todos
