@@ -1,8 +1,9 @@
-
-using Microsoft.EntityFrameworkCore;
+using System.Text;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using TeaMall.Data;
-using TeaMall.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,9 +17,20 @@ builder.Services.AddDbContext<DataContext>(options =>
     )
 );
 
-// Configuración de autenticación mediante cookies
+// Configuración de autenticación: Cookies + JWT
 builder.Services
-    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddAuthentication(options =>
+    {
+        // La web continúa utilizando cookies
+        options.DefaultAuthenticateScheme =
+            CookieAuthenticationDefaults.AuthenticationScheme;
+
+        options.DefaultSignInScheme =
+            CookieAuthenticationDefaults.AuthenticationScheme;
+
+        options.DefaultChallengeScheme =
+            CookieAuthenticationDefaults.AuthenticationScheme;
+    })
     .AddCookie(options =>
     {
         options.LoginPath = "/Login/Index";
@@ -26,10 +38,32 @@ builder.Services
         options.Cookie.Name = "TeamMall.Auth";
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
-    });
+    })
+    .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
 
-// Servicio de Google Drive para consultar la última modificación
-builder.Services.AddSingleton<GoogleDriveService>();
+            ValidIssuer =
+                builder.Configuration["TokenAuthentication:Issuer"],
+
+            ValidAudience =
+                builder.Configuration["TokenAuthentication:Audience"],
+
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.ASCII.GetBytes(
+                    builder.Configuration["TokenAuthentication:SecretKey"]
+                    ?? throw new InvalidOperationException(
+                        "No está configurada la clave secreta de JWT."
+                    )
+                )
+            )
+        };
+    });
 
 // Servicios MVC
 builder.Services.AddControllersWithViews();
@@ -38,6 +72,9 @@ builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "RequestVerificationToken";
 });
+
+// Autorización
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -53,6 +90,8 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllers();
 
 app.MapStaticAssets();
 
