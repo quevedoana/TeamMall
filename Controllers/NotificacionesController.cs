@@ -105,7 +105,10 @@ namespace TeaMall.Controllers
             }
 
             var notificaciones = await _context.Notificaciones
-                .Where(n => n.IdUsuario == idUsuario)
+                .Where(n =>
+                    n.IdUsuario == idUsuario &&
+                    n.FechaAccesoPublicacion == null
+                )
                 .Join(
                     _context.Publicaciones,
                     n => n.IdPublicacion,
