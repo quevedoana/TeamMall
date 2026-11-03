@@ -127,6 +127,24 @@ namespace TeaMall.Controllers
             return View();
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Administrador")]
+        public async Task<IActionResult> BuscarLocales(string? texto)
+        {
+            var locales = await _context.Locales
+                .Where(l => l.Activo &&
+                            (string.IsNullOrEmpty(texto) ||
+                            l.Nombre.Contains(texto)))
+                .OrderBy(l => l.Nombre)
+                .Select(l => new
+                {
+                    idLocal = l.IdLocal,
+                    nombre = l.Nombre
+                })
+                .ToListAsync();
+
+            return Json(locales);
+        }
         // POST: Publicaciones/Create
         [HttpPost]
         [ValidateAntiForgeryToken]

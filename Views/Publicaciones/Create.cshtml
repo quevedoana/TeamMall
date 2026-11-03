@@ -166,23 +166,9 @@
                     <!-- LOCALES -->
                     <div class="tm-locales-list">
 
-                        @foreach (var local in ViewBag.Locales)
-                        {
-                            <label class="tm-local-checkbox">
-
-                                <input class="form-check-input local-checkbox"
-                                       type="checkbox"
-                                       name="LocalesSeleccionados"
-                                       value="@local.IdLocal"
-                                       data-nombre="@local.Nombre"
-                                       id="local_@local.IdLocal" />
-
-                                <span>
-                                    @local.Nombre
-                                </span>
-
-                            </label>
-                        }
+                        <div id="listaLocales">
+                            <!-- Los locales se cargarán mediante AJAX -->
+                        </div>
 
                     </div>
 
@@ -296,15 +282,7 @@
          */
         function actualizarTextoLocales() {
 
-            const seleccionados =
-                document.querySelectorAll(".local-checkbox:checked");
-
-            const cantidad =
-                seleccionados.length;
-
-            const total =
-                document.querySelectorAll(".local-checkbox").length;
-
+            const cantidad = localesSeleccionados.size;
 
             if (cantidad === 0) {
 
@@ -312,7 +290,7 @@
                     "Seleccionar locales";
 
             }
-            else if (cantidad === total) {
+            else if (cantidad === totalLocales && totalLocales > 0) {
 
                 dropdownText.textContent =
                     "Todos los locales seleccionados";
@@ -331,59 +309,95 @@
 
             }
 
-
             seleccionarTodos.checked =
-                cantidad === total && total > 0;
+                cantidad === totalLocales && totalLocales > 0;
 
             seleccionarTodos.indeterminate =
-                cantidad > 0 && cantidad < total;
+                cantidad > 0 && cantidad < totalLocales;
+        }
 
+        const listaLocales = document.getElementById("listaLocales");
+
+        let localesSeleccionados = new Set();
+        let totalLocales = 0;
+        async function buscarLocalesAjax(texto = "") {
+            try {
+                const respuesta = await fetch(
+                    `/Publicaciones/BuscarLocales?texto=${encodeURIComponent(texto)}`
+                );
+
+                if (!respuesta.ok) {
+                    throw new Error("No se pudieron obtener los locales.");
+                }
+
+                const locales = await respuesta.json();
+                if (texto === "") {
+                    totalLocales = locales.length;
+                }
+                listaLocales.innerHTML = "";
+
+                locales.forEach(local => {
+                    const label = document.createElement("label");
+                    label.className = "tm-local-checkbox";
+                    label.dataset.nombre = local.nombre;
+
+                    const checkbox = document.createElement("input");
+                    checkbox.type = "checkbox";
+                    checkbox.className = "local-checkbox";
+                    checkbox.name = "LocalesSeleccionados";
+                    checkbox.value = local.idLocal;
+
+                    checkbox.checked = localesSeleccionados.has(local.idLocal);
+
+                    checkbox.addEventListener("change", function () {
+                        if (this.checked) {
+                            localesSeleccionados.add(local.idLocal);
+                        } else {
+                            localesSeleccionados.delete(local.idLocal);
+                        }
+
+                        actualizarTextoLocales();
+                    });
+
+                    const span = document.createElement("span");
+                    span.textContent = local.nombre;
+
+                    label.appendChild(checkbox);
+                    label.appendChild(span);
+
+                    listaLocales.appendChild(label);
+                });
+
+            } catch (error) {
+                console.error("Error al buscar locales:", error);
+            }
         }
 
         buscarLocal.addEventListener("input", function () {
-
-            const texto =
-                buscarLocal.value.toLowerCase().trim();
-
-            document.querySelectorAll(".tm-local-checkbox")
-                .forEach(function (label) {
-
-                    const checkbox =
-                        label.querySelector(".local-checkbox");
-
-                    if (!checkbox) {
-                        return;
-                    }
-
-                    const nombre =
-                        checkbox.dataset.nombre.toLowerCase();
-
-                    if (nombre.includes(texto)) {
-                        label.style.display = "flex";
-                    }
-                    else {
-                        label.style.display = "none";
-                    }
-
-                });
-
+            buscarLocalesAjax(this.value.trim());
         });
+
+        buscarLocalesAjax();
 
         /*
          * Seleccionar todos
          */
         seleccionarTodos.addEventListener("change", function () {
+            const checked = this.checked;
 
-            document.querySelectorAll(".local-checkbox")
-                .forEach(function (checkbox) {
+            document.querySelectorAll(".local-checkbox").forEach(checkbox => {
+                checkbox.checked = checked;
 
-                    checkbox.checked =
-                        seleccionarTodos.checked;
+                const idLocal = parseInt(checkbox.value);
 
-                });
+                if (checked) {
+                    localesSeleccionados.add(idLocal);
+                } else {
+                    localesSeleccionados.delete(idLocal);
+                }
+            });
 
             actualizarTextoLocales();
-
         });
 
 

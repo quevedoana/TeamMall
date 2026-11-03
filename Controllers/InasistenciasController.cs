@@ -131,7 +131,16 @@ namespace TeaMall.Controllers
                 .Skip((pagina - 1) * registrosPorPagina)
                 .Take(registrosPorPagina)
                 .ToListAsync();
+            
+            var usuariosVendedor = await _context.Usuarios
+                .Where(u => u.IdUsuario == idUsuario)
+                .ToDictionaryAsync(
+                    u => u.IdUsuario,
+                    u => u.Nombre + " " + u.Apellido
+                );
 
+            ViewBag.Usuarios = usuariosVendedor;
+            
             ViewBag.PaginaActual = pagina;
             ViewBag.TotalPaginas = totalPaginasVendedor;
             ViewBag.TotalRegistros = totalRegistrosVendedor;
