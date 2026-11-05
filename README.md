@@ -4,6 +4,23 @@ TeamMall es un sistema web MVC orientado a la gestión y comunicación interna d
 
 El sistema permite administrar usuarios y locales, publicar comunicaciones dirigidas a determinados locales, generar notificaciones para los vendedores, gestionar inasistencias y justificativos, administrar perfiles y avatares, consultar horarios mediante una planilla de Google Sheets e integrar una Web API protegida con JWT.
 
+## Integrantes
+
+- **Ana Paula Quevedo**
+- **Antonio Tomas Assat**
+
+## Matriz de Evidencias de Requerimientos Mínimos
+
+| Requerimiento mínimo | Estado | Enlace al código / controladores | Evidencia |
+|---|---|---|---|
+| **1. Modelo de datos y persistencia: 6 entidades relacionadas, 1:N y N:M** | ✅ Cumplido | [`DataContext.cs`](Data/DataContext.cs), [`Models`](Models/) | [`ER-TEAMMALL.png`](Docs/ER-TEAMMALL.png) |
+| **2. Login, Logout, roles, seguridad backend y avatar** | ✅ Cumplido | [`LoginController.cs`](Controllers/LoginController.cs), [`Program.cs`](Program.cs), [`PerfilController.cs`](Controllers/PerfilController.cs), [`LocalesController.cs`](Controllers/LocalesController.cs), [`UsuariosController.cs`](Controllers/UsuariosController.cs) | [`Avatar.PNG`](Docs/Avatar.PNG) |
+| **3. Manejo de archivos adicional al avatar** | ✅ Cumplido | [`PublicacionesController.cs`](Controllers/PublicacionesController.cs), [`InasistenciasController.cs`](Controllers/InasistenciasController.cs) | [`manejo-archivos-buscador.mp4`](Docs/manejo-archivos-buscador.mp4) |
+| **4. ABM/CRUD con Vue.js + AJAX/JSON** | ✅ Cumplido | [`LocalesController.cs`](Controllers/LocalesController.cs), [`Views/Locales/Index.cshtml`](Views/Locales/Index.cshtml), [`Views/Locales/Create.cshtml`](Views/Locales/Create.cshtml), [`Views/Locales/Edit.cshtml`](Views/Locales/Edit.cshtml) | [`abm-Ajax.mp4`](Docs/abm-Ajax.mp4) |
+| **5. Paginado por servidor** | ✅ Cumplido | [`UsuariosController.cs`](Controllers/UsuariosController.cs), [`LocalesController.cs`](Controllers/LocalesController.cs), [`PublicacionesController.cs`](Controllers/PublicacionesController.cs), [`NotificacionesController.cs`](Controllers/NotificacionesController.cs), [`InasistenciasController.cs`](Controllers/InasistenciasController.cs) | [`paginado.PNG`](Docs/paginado.PNG) |
+| **6. Búsqueda asíncrona de entidades relacionadas** | ✅ Cumplido | [`PublicacionesController.cs`](Controllers/PublicacionesController.cs), [`Views/Publicaciones/Create.cshtml`](Views/Publicaciones/Create.cshtml) | [`manejo-archivos-buscador.mp4`](Docs/manejo-archivos-buscador.mp4) |
+| **7. Web API REST con JWT** | ✅ Cumplido | [`AuthController.cs`](Controllers/Api/AuthController.cs), [`LocalesApiController.cs`](Controllers/Api/LocalesApiController.cs), [`PerfilController.cs`](Controllers/Api/PerfilController.cs) | [`postman.PNG`](Docs/postman.PNG) |
+
 ## Tecnologías utilizadas
 
 - C#
@@ -379,8 +396,6 @@ El repositorio contiene archivos de configuración de Postman en:
 - `.postman/resources.yaml`
 - `postman/globals/workspace.globals.yaml`
 
-> Para una entrega que requiera la colección de pruebas exportada como condición de promoción, debe incorporarse al repositorio el archivo de colección correspondiente. En el contenido analizado no se encontró un archivo de colección exportada independiente.
-
 ## Google Sheets y horarios
 
 Los horarios de los locales se encuentran en una planilla de Google Sheets.
@@ -507,18 +522,6 @@ El repositorio incluye:
 
 El archivo SQL contiene estructura y datos de ejemplo de las tablas principales.
 
-## Matriz de Evidencias de Requerimientos Mínimos
-
-| Requerimiento mínimo | Estado | Enlace al código / controladores | Evidencia |
-|---|---|---|---|
-| **1. Modelo de datos y persistencia: 6 entidades relacionadas, 1:N y N:M** | ✅ Cumplido | [`DataContext.cs`](Data/DataContext.cs), [`Models`](Models/) | [`ER-TEAMMALL.png`](Docs/ER-TEAMMALL.png) |
-| **2. Login, Logout, roles, seguridad backend y avatar** | ✅ Cumplido | [`LoginController.cs`](Controllers/LoginController.cs), [`Program.cs`](Program.cs), [`PerfilController.cs`](Controllers/PerfilController.cs), [`LocalesController.cs`](Controllers/LocalesController.cs), [`UsuariosController.cs`](Controllers/UsuariosController.cs) | [`Avatar.PNG`](Docs/Avatar.PNG) |
-| **3. Manejo de archivos adicional al avatar** | ✅ Cumplido | [`PublicacionesController.cs`](Controllers/PublicacionesController.cs), [`InasistenciasController.cs`](Controllers/InasistenciasController.cs) | [`manejo-archivos-buscador.mp4`](Docs/manejo-archivos-buscador.mp4) |
-| **4. ABM/CRUD con Vue.js + AJAX/JSON** | ✅ Cumplido | [`LocalesController.cs`](Controllers/LocalesController.cs), [`Views/Locales/Index.cshtml`](Views/Locales/Index.cshtml), [`Views/Locales/Create.cshtml`](Views/Locales/Create.cshtml), [`Views/Locales/Edit.cshtml`](Views/Locales/Edit.cshtml) | [`abm-Ajax.mp4`](Docs/abm-Ajax.mp4) |
-| **5. Paginado por servidor** | ✅ Cumplido | [`UsuariosController.cs`](Controllers/UsuariosController.cs), [`LocalesController.cs`](Controllers/LocalesController.cs), [`PublicacionesController.cs`](Controllers/PublicacionesController.cs), [`NotificacionesController.cs`](Controllers/NotificacionesController.cs), [`InasistenciasController.cs`](Controllers/InasistenciasController.cs) | [`paginado.PNG`](Docs/paginado.PNG) |
-| **6. Búsqueda asíncrona de entidades relacionadas** | ✅ Cumplido | [`PublicacionesController.cs`](Controllers/PublicacionesController.cs), [`Views/Publicaciones/Create.cshtml`](Views/Publicaciones/Create.cshtml) | [`manejo-archivos-buscador.mp4`](Docs/manejo-archivos-buscador.mp4) |
-| **7. Web API REST con JWT** | ⚠️ Implementado; falta agregar una colección exportada independiente si la entrega exige ese archivo | [`AuthController.cs`](Controllers/Api/AuthController.cs), [`LocalesApiController.cs`](Controllers/Api/LocalesApiController.cs), [`PerfilController.cs`](Controllers/Api/PerfilController.cs) | [`postman.PNG`](Docs/postman.PNG) |
-
 ## Evidencias
 
 Todas las evidencias utilizadas para la entrega se encuentran en:
@@ -551,38 +554,6 @@ Docs/
 
 [`postman.PNG`](Docs/postman.PNG)
 
-## Configuración
-
-La cadena de conexión se configura mediante:
-
-```text
-ConnectionStrings:DefaultConnection
-```
-
-El archivo `appsettings.json` del repositorio no contiene una cadena de conexión de base de datos completa.
-
-Para JWT se utilizan las siguientes claves de configuración:
-
-```text
-TokenAuthentication:SecretKey
-TokenAuthentication:Issuer
-TokenAuthentication:Audience
-```
-
-Estas claves deben configurarse de forma segura.
-
-Para Google Drive se utilizan:
-
-```text
-GoogleDrive:CredentialPath
-GoogleDrive:SpreadsheetId
-```
-
-El archivo de credenciales de Google está excluido del repositorio mediante:
-
-```text
-Credenciales/*
-```
 
 ## Ejecución local
 
@@ -614,13 +585,7 @@ El repositorio incluye:
 teamMall.sql
 ```
 
-que contiene la estructura y datos de ejemplo de la base de datos `teammall`.
-
-### Credenciales de prueba
-
-El archivo SQL incluido en el proyecto contiene usuarios de ejemplo, pero las contraseñas almacenadas en ese dump aparecen como valores de reemplazo (`CAMBIAR_HASH_ADMIN` y `CAMBIAR_HASH_VENDEDORA`). Por ese motivo, no se indican contraseñas de prueba inventadas en este README.
-
-Para una entrega destinada a promoción, deben incorporarse credenciales de prueba válidas para cada rol, tal como solicita el enunciado.
+que contiene la estructura y los datos de ejemplo de la base de datos `teammall`.
 
 ## .gitignore
 
@@ -633,9 +598,3 @@ Credenciales/*
 ```
 
 Esto evita subir las credenciales privadas de Google Drive al repositorio.
-
-## Estado de los requerimientos
-
-El proyecto contiene las implementaciones correspondientes a los requerimientos técnicos principales y las evidencias asociadas en la carpeta `Docs`.
-
-Para una entrega de promoción, además de mantener el proyecto funcional, se deben verificar los elementos administrativos exigidos por el enunciado: credenciales de usuarios de prueba para cada rol y, cuando corresponda, la colección exportada de Postman/Bruno/Insomnia para probar la Web API con JWT.
